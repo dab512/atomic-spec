@@ -133,6 +133,10 @@ atomic-spec/
     └── orchestrator.html
 ```
 
+## Website
+
+Browse the interactive documentation: **[dab512.github.io/atomic-spec](https://dab512.github.io/atomic-spec/)**
+
 ## The Methodology Test
 
 > Can you reconstruct the complete domain history — who, when, why made each decision — only from `git log` on `*.spec.md` files? **Yes** → methodology applied correctly.
