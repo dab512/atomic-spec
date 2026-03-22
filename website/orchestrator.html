@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atomic Spec — ИИ-Агент Оркестратор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg: #060609;
+  --surface: #0c0c12;
+  --surface2: #121218;
+  --surface3: #18181f;
+  --border: #1c1c26;
+  --border2: #242432;
+  --text: #b8b8cc;
+  --text-dim: #52526a;
+  --text-bright: #e0e0f0;
+  --accent: #e0e0f0;
+  --orchestrator: #e879f9;
+  --orchestrator-bg: #160a1a;
+  --analyst: #5b8df8;
+  --analyst-bg: #0a0f1f;
+  --dev: #22d49e;
+  --dev-bg: #061612;
+  --tester: #f5a623;
+  --tester-bg: #130e03;
+  --breaking: #f4654e;
+  --additive: #a3e635;
+  --compatible: #5b8df8;
+  --gate-pass: #22d49e;
+  --gate-fail: #f4654e;
+  --r: 6px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+body::before {
+  content:'';position:fixed;inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.35;
+}
+
+/* ── Layout ── */
+.shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+/* ── Sidebar ── */
+aside {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: var(--surface); border-right: 1px solid var(--border);
+  padding: 32px 0;
+}
+aside::-webkit-scrollbar { width: 3px; }
+aside::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.logo h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 600;
+  color: var(--orchestrator); letter-spacing: .1em; text-transform: uppercase;
+}
+.logo p { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+.nav-group { padding: 12px 24px 4px; }
+.nav-group-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 8px;
+}
+
+.nav-link {
+  display: block; padding: 6px 12px; margin: 2px 0;
+  font-size: 13px; color: var(--text-dim); text-decoration: none;
+  border-radius: var(--r); transition: all .15s;
+}
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.nav-link.active { color: var(--orchestrator); background: var(--orchestrator-bg); }
+
+.nav-role { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+.nav-role.orc { background: var(--orchestrator); }
+.nav-role.ana { background: var(--analyst); }
+.nav-role.dev { background: var(--dev); }
+.nav-role.tst { background: var(--tester); }
+
+/* ── Main Content ── */
+main { padding: 48px 64px 120px; max-width: 920px; }
+
+h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 28px; font-weight: 700; color: var(--text-bright);
+  margin: 64px 0 24px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+h2:first-of-type { margin-top: 0; }
+
+h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px; font-weight: 600; color: var(--text-bright);
+  margin: 36px 0 12px;
+}
+
+h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  letter-spacing: .04em; margin: 24px 0 8px;
+}
+
+p { margin-bottom: 14px; }
+strong { color: var(--text-bright); font-weight: 500; }
+
+/* ── Hero ── */
+.hero {
+  padding: 48px 40px; margin-bottom: 48px;
+  background: linear-gradient(135deg, var(--orchestrator-bg), var(--surface2));
+  border: 1px solid var(--border2); border-radius: 12px;
+  position: relative; overflow: hidden;
+}
+.hero::after {
+  content:''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(232,121,249,.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--orchestrator); margin-bottom: 16px;
+}
+.hero h2 { border: none; margin: 0 0 16px; padding: 0; font-size: 36px; }
+.hero p { color: var(--text); font-size: 16px; line-height: 1.7; max-width: 600px; }
+
+/* ── Pipeline Diagram ── */
+.pipeline {
+  display: grid; grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 0; align-items: stretch; margin: 32px 0;
+}
+.pipe-role {
+  padding: 20px; border-radius: var(--r);
+  border: 1px solid var(--border);
+}
+.pipe-role h4 { margin-top: 0; }
+.pipe-role.analyst { border-color: color-mix(in srgb, var(--analyst) 30%, transparent); background: var(--analyst-bg); }
+.pipe-role.developer { border-color: color-mix(in srgb, var(--dev) 30%, transparent); background: var(--dev-bg); }
+.pipe-role.tester { border-color: color-mix(in srgb, var(--tester) 30%, transparent); background: var(--tester-bg); }
+
+.pipe-gate {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+}
+.pipe-gate span {
+  writing-mode: vertical-rl; text-orientation: mixed;
+  padding: 12px 4px; border-radius: var(--r);
+  background: var(--surface2); border: 1px solid var(--border);
+  letter-spacing: .08em;
+}
+
+/* ── Role Tag ── */
+.role-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 4px; margin-bottom: 8px;
+}
+.role-tag.orc { color: var(--orchestrator); background: var(--orchestrator-bg); border: 1px solid color-mix(in srgb, var(--orchestrator) 25%, transparent); }
+.role-tag.ana { color: var(--analyst); background: var(--analyst-bg); border: 1px solid color-mix(in srgb, var(--analyst) 25%, transparent); }
+.role-tag.dev { color: var(--dev); background: var(--dev-bg); border: 1px solid color-mix(in srgb, var(--dev) 25%, transparent); }
+.role-tag.tst { color: var(--tester); background: var(--tester-bg); border: 1px solid color-mix(in srgb, var(--tester) 25%, transparent); }
+
+/* ── Code Blocks ── */
+.code {
+  margin: 16px 0; border-radius: var(--r);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.code-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+}
+.code-dots { display: flex; gap: 5px; }
+.code-dot { width: 8px; height: 8px; border-radius: 50%; }
+.code-body {
+  padding: 16px 18px; background: var(--surface);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.9; color: var(--text);
+  white-space: pre; overflow-x: auto;
+}
+.cc { color: var(--text-dim); }
+.ck { color: var(--orchestrator); }
+.cs { color: var(--additive); }
+.cv { color: var(--analyst); }
+.ct { color: var(--tester); }
+
+/* ── Gate Table ── */
+.gate-table { width: 100%; margin: 16px 0; border-collapse: collapse; }
+.gate-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  text-align: left; padding: 10px 14px;
+  background: var(--surface2); color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+}
+.gate-table td {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  font-size: 13px; vertical-align: top;
+}
+.gate-table tr:hover td { background: var(--surface); }
+.gate-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--gate-pass); font-weight: 600;
+}
+
+/* ── Steps / Flow ── */
+.flow { counter-reset: step; margin: 24px 0; }
+.flow-step {
+  position: relative; padding: 20px 24px 20px 56px; margin-bottom: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); counter-increment: step;
+}
+.flow-step::before {
+  content: counter(step);
+  position: absolute; left: 18px; top: 20px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--orchestrator-bg); border: 1px solid var(--orchestrator);
+  color: var(--orchestrator);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.flow-step h4 { margin-top: 0; }
+
+/* ── Change Class Badges ── */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+}
+.badge.breaking { color: var(--breaking); background: rgba(244,101,78,.1); border: 1px solid rgba(244,101,78,.2); }
+.badge.additive { color: var(--additive); background: rgba(163,230,53,.08); border: 1px solid rgba(163,230,53,.15); }
+.badge.compatible { color: var(--compatible); background: rgba(91,141,248,.08); border: 1px solid rgba(91,141,248,.15); }
+
+/* ── Callout ── */
+.callout {
+  padding: 16px 20px; margin: 20px 0; border-radius: var(--r);
+  border-left: 3px solid var(--orchestrator);
+  background: var(--orchestrator-bg);
+  font-size: 14px;
+}
+.callout.warn { border-color: var(--tester); background: var(--tester-bg); }
+.callout strong { color: var(--text-bright); }
+
+/* ── Sections list ── */
+.sections-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0;
+}
+.section-card {
+  padding: 14px 16px; border-radius: var(--r);
+  border: 1px solid var(--border); background: var(--surface);
+}
+.section-card .sc-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 600; color: var(--text-bright);
+  margin-bottom: 4px;
+}
+.section-card .sc-owner { font-size: 12px; color: var(--text-dim); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  aside { display: none; }
+  main { padding: 32px 24px 80px; }
+  .pipeline { grid-template-columns: 1fr; gap: 12px; }
+  .pipe-gate { padding: 8px 0; }
+  .pipe-gate span { writing-mode: horizontal-tb; }
+  .sections-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.hero, .flow-step, .pipe-role { animation: fadeUp .5s ease both; }
+.flow-step:nth-child(2) { animation-delay: .06s; }
+.flow-step:nth-child(3) { animation-delay: .12s; }
+.flow-step:nth-child(4) { animation-delay: .18s; }
+.flow-step:nth-child(5) { animation-delay: .24s; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ── Sidebar ── -->
+<aside>
+  <div class="logo">
+    <h1>Atomic Spec</h1>
+    <p>ИИ-Агент Оркестратор</p>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Обзор</div>
+    <a href="#philosophy" class="nav-link active"><span class="nav-role orc"></span>Философия</a>
+    <a href="#pipeline" class="nav-link"><span class="nav-role orc"></span>Пайплайн</a>
+    <a href="#workflow" class="nav-link"><span class="nav-role orc"></span>Workflow</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Роли</div>
+    <a href="#analyst" class="nav-link"><span class="nav-role ana"></span>Аналитик</a>
+    <a href="#developer" class="nav-link"><span class="nav-role dev"></span>Разработчик</a>
+    <a href="#tester" class="nav-link"><span class="nav-role tst"></span>Тестировщик</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Механики</div>
+    <a href="#gates" class="nav-link">Gate-валидация</a>
+    <a href="#atoms" class="nav-link">Анатомия атома</a>
+    <a href="#git" class="nav-link">Git-конвенции</a>
+    <a href="#amendments" class="nav-link">Правки</a>
+    <a href="#skill-setup" class="nav-link">Установка SKILL.md</a>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main>
+
+  <!-- Hero -->
+  <div class="hero" id="philosophy">
+    <div class="hero-tag">Atomic Spec / AI Agent</div>
+    <h2>ИИ-Агент Оркестратор</h2>
+    <p>Единый агент, который декомпозирует задачу на атомы, последовательно переключается между ролями <strong>Аналитик → Разработчик → Тестировщик</strong>, валидирует артефакты на каждом gate и ведёт git по конвенциям методологии.</p>
+  </div>
+
+  <p>Классический процесс разработки требует координации трёх ролей. В гибридной AI-разработке агент берёт на себя роль оркестратора — он не заменяет людей, а структурирует работу так, что каждый артефакт проходит через формальные gate-проверки прежде чем попасть к следующей роли.</p>
+
+  <div class="callout">
+    <strong>Ключевой принцип:</strong> агент не пропускает роли. Даже для "простой" задачи пайплайн проходит полностью: анализ → реализация → тестирование. Gate между ролями — обязателен.
+  </div>
+
+  <!-- Pipeline -->
+  <h2 id="pipeline">Пайплайн ролей</h2>
+
+  <div class="pipeline">
+    <div class="pipe-role analyst">
+      <div class="role-tag ana">Аналитик</div>
+      <h4>Артефакты</h4>
+      <p style="font-size:13px">§ Intent<br>§ Domain Rules<br>§ Acceptance Criteria<br>§ Domain Model Touch<br>§ Constraints</p>
+    </div>
+    <div class="pipe-gate"><span>GATE A</span></div>
+    <div class="pipe-role developer">
+      <div class="role-tag dev">Разработчик</div>
+      <h4>Артефакты</h4>
+      <p style="font-size:13px">§ Tech Spec<br>§ Implementation Notes<br>Исходный код<br>API-контракты</p>
+    </div>
+    <div class="pipe-gate"><span>GATE B</span></div>
+    <div class="pipe-role tester">
+      <div class="role-tag tst">Тестировщик</div>
+      <h4>Артефакты</h4>
+      <p style="font-size:13px">§ Test Plan<br>§ AC Review<br>Тестовый код<br>Coverage Matrix</p>
+    </div>
+  </div>
+
+  <p>Каждая роль читает <strong>свой reference-файл</strong> перед началом работы. Reference содержит: чек-листы, матрицы решений, примеры заполнения каждой секции, частые ошибки и anti-patterns.</p>
+
+  <!-- Workflow -->
+  <h2 id="workflow">Workflow: от задачи к коду</h2>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="role-tag orc">Оркестратор</div>
+      <h4>Шаг 0 — Декомпозиция</h4>
+      <p>Определить домен, тип изменения, change_class. Если задача затрагивает несколько use-case — декомпозировать на отдельные атомы. Показать план пользователю.</p>
+    </div>
+    <div class="flow-step">
+      <div class="role-tag ana">Аналитик</div>
+      <h4>Шаг 1 — Анализ требований</h4>
+      <p>Прочитать <code>references/analyst.md</code>. Создать spec.md: Intent, Domain Rules, Acceptance Criteria (Gherkin), Domain Model Touch, Constraints. Самопроверка по Gate A.</p>
+    </div>
+    <div class="flow-step">
+      <div class="role-tag dev">Разработчик</div>
+      <h4>Шаг 2 — Реализация</h4>
+      <p>Прочитать <code>references/developer.md</code>. Изучить атом. Написать Tech Spec (API, схемы, архитектура), код с маркерами DR-N, Implementation Notes. Самопроверка по Gate B.</p>
+    </div>
+    <div class="flow-step">
+      <div class="role-tag tst">Тестировщик</div>
+      <h4>Шаг 3 — Тестирование</h4>
+      <p>Прочитать <code>references/tester.md</code>. Составить Coverage Matrix. Расширить AC edge-cases. Написать Test Plan с конкретными данными. Написать тестовый код. Самопроверка по Gate C.</p>
+    </div>
+    <div class="flow-step">
+      <div class="role-tag orc">Оркестратор</div>
+      <h4>Шаг 4 — Финальная валидация</h4>
+      <p>Все gates пройдены? Файлы в правильной структуре? Git-конвенции соблюдены? Open Questions закрыты? → Итоговый отчёт пользователю.</p>
+    </div>
+  </div>
+
+  <!-- Roles Detail -->
+  <h2 id="analyst">Роль: Аналитик</h2>
+  <div class="role-tag ana">PM / Business Analyst</div>
+
+  <p>Аналитик превращает бизнес-потребность в формализованный атом. Его секции <strong>технологически агностичны</strong> — никаких фреймворков, баз данных, API-эндпоинтов.</p>
+
+  <h3>Владеет секциями</h3>
+  <div class="sections-grid">
+    <div class="section-card"><div class="sc-name">§ Intent</div><div class="sc-owner">Бизнес-намерение в 1–3 предложениях</div></div>
+    <div class="section-card"><div class="sc-name">§ Domain Rules</div><div class="sc-owner">DR-N: проверяемые инварианты</div></div>
+    <div class="section-card"><div class="sc-name">§ Acceptance Criteria</div><div class="sc-owner">Gherkin — ЧТО, не КАК</div></div>
+    <div class="section-card"><div class="sc-name">§ Domain Model Touch</div><div class="sc-owner">Агрегаты, события, инварианты</div></div>
+    <div class="section-card"><div class="sc-name">§ Constraints</div><div class="sc-owner">[PERF] [SEC] [IDMP] [A11Y]</div></div>
+    <div class="section-card"><div class="sc-name">§ Open Questions</div><div class="sc-owner">OQ-N: blocking / non-blocking</div></div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Anti-pattern:</strong> DR без последствий. "Email должен быть уникален" — а что если нет? Каждое правило = условие + реакция системы при нарушении.
+  </div>
+
+  <h2 id="developer">Роль: Разработчик</h2>
+  <div class="role-tag dev">Developer</div>
+
+  <p>Разработчик получает атом после Gate A и превращает его в работающий код. Атом — контракт. DR и AC — это ТЗ. Если что-то неясно — не додумывай, открой Open Question.</p>
+
+  <h3>Владеет секциями</h3>
+  <div class="sections-grid">
+    <div class="section-card"><div class="sc-name">§ Tech Spec</div><div class="sc-owner">API-контракты, схемы, архитектура</div></div>
+    <div class="section-card"><div class="sc-name">§ Implementation Notes</div><div class="sc-owner">Trade-offs, deps, limitations, file map</div></div>
+  </div>
+
+  <div class="code">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div>маркировка DR в коде</div>
+    <div class="code-body"><span class="ck">def</span> register_user(email, password):
+    <span class="cc"># DR-1: Email must be unique</span>
+    <span class="ck">if</span> user_repo.exists_by_email(email):
+        <span class="ck">raise</span> EmailAlreadyExistsError(email)
+
+    <span class="cc"># DR-2: Password policy</span>
+    violations = password_policy.validate(password)
+    <span class="ck">if</span> violations:
+        <span class="ck">raise</span> WeakPasswordError(violations)
+
+    user = User.create(email, hash_password(password))
+    event_bus.publish(<span class="cv">UserRegistered</span>(user.id, email))</div>
+  </div>
+
+  <h2 id="tester">Роль: Тестировщик</h2>
+  <div class="role-tag tst">QA Engineer</div>
+
+  <p>Тестировщик получает атом после Gate B. AC Аналитика — минимум, не максимум. Тестировщик расширяет покрытие: edge-cases, boundary conditions, concurrency, injection, encoding.</p>
+
+  <h3>Владеет секциями</h3>
+  <div class="sections-grid">
+    <div class="section-card"><div class="sc-name">§ Test Plan</div><div class="sc-owner">TC-NNN: конкретные данные, шаги, ожидания</div></div>
+    <div class="section-card"><div class="sc-name">§ AC Review</div><div class="sc-owner">Расширяет AC Аналитика edge-cases</div></div>
+  </div>
+
+  <h3>Категории edge-cases</h3>
+  <div class="code">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div>обязательные проверки</div>
+    <div class="code-body"><span class="ct">1.</span> Boundary values      — мин/макс значения полей
+<span class="ct">2.</span> Empty/null/missing   — пустые строки, null, без поля
+<span class="ct">3.</span> Format violations    — невалидные форматы
+<span class="ct">4.</span> Injection            — SQL, XSS
+<span class="ct">5.</span> Concurrency          — одновременные запросы
+<span class="ct">6.</span> Idempotency          — повторная отправка
+<span class="ct">7.</span> Rate limiting        — граничные значения
+<span class="ct">8.</span> Encoding             — Unicode, emoji, RTL
+<span class="ct">9.</span> Error recovery       — БД down, bus down
+<span class="ct">10.</span> Timeout              — превышение PERF-лимита</div>
+  </div>
+
+  <!-- Gates -->
+  <h2 id="gates">Gate-валидация</h2>
+
+  <h3>Gate A: Аналитик → Разработчик</h3>
+  <table class="gate-table">
+    <tr><th>ID</th><th>Проверка</th><th>Критерий</th></tr>
+    <tr><td class="gate-id">A1</td><td>Intent заполнен</td><td>1–3 предложения, без технических деталей</td></tr>
+    <tr><td class="gate-id">A2</td><td>Domain Rules есть</td><td>≥ 1 DR с уникальным ID, каждый проверяем</td></tr>
+    <tr><td class="gate-id">A3</td><td>AC написаны</td><td>≥ 1 Gherkin, технологически нейтральный</td></tr>
+    <tr><td class="gate-id">A4</td><td>Actors указаны</td><td>В frontmatter и в AC</td></tr>
+    <tr><td class="gate-id">A5</td><td>Events заполнены</td><td>emits / consumes</td></tr>
+    <tr><td class="gate-id">A6</td><td>Нет техн. решений</td><td>Без фреймворков, БД, API в Intent и DR</td></tr>
+    <tr><td class="gate-id">A7</td><td>OQ закрыты</td><td>Все blocking → Decision Log</td></tr>
+    <tr><td class="gate-id">A8</td><td>change_class</td><td>breaking / additive / compatible</td></tr>
+  </table>
+
+  <h3>Gate B: Разработчик → Тестировщик</h3>
+  <table class="gate-table">
+    <tr><th>ID</th><th>Проверка</th><th>Критерий</th></tr>
+    <tr><td class="gate-id">B1</td><td>Tech Spec</td><td>API-контракты, схемы, миграции</td></tr>
+    <tr><td class="gate-id">B2</td><td>Код создан</td><td>Файлы реализации или пути к ним</td></tr>
+    <tr><td class="gate-id">B3</td><td>AC не сломаны</td><td>Tech Spec не противоречит AC</td></tr>
+    <tr><td class="gate-id">B4</td><td>DR соблюдены</td><td>Реализация покрывает все DR</td></tr>
+    <tr><td class="gate-id">B5</td><td>NFR учтены</td><td>Constraints из атома в реализации</td></tr>
+    <tr><td class="gate-id">B6</td><td>Нет TODO без OQ</td><td>Каждый TODO → ссылка на OQ-N</td></tr>
+  </table>
+
+  <h3>Gate C: Тестировщик → Done</h3>
+  <table class="gate-table">
+    <tr><th>ID</th><th>Проверка</th><th>Критерий</th></tr>
+    <tr><td class="gate-id">C1</td><td>Test Plan</td><td>Конкретные тест-кейсы с данными</td></tr>
+    <tr><td class="gate-id">C2</td><td>AC покрыты</td><td>Каждый Gherkin → тест-кейс</td></tr>
+    <tr><td class="gate-id">C3</td><td>DR покрыты</td><td>Каждое DR → тест</td></tr>
+    <tr><td class="gate-id">C4</td><td>Edge cases</td><td>≥ 1 негативный на каждый AC</td></tr>
+    <tr><td class="gate-id">C5</td><td>NFR тестируются</td><td>PERF→бенчмарк, SEC→проверка, IDMP→повтор</td></tr>
+  </table>
+
+  <!-- Atoms -->
+  <h2 id="atoms">Анатомия атома</h2>
+
+  <p>Каждый атом = YAML frontmatter + секции Markdown. Секции идут от абстрактного к конкретному — принцип progressive disclosure.</p>
+
+  <div class="code">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div>frontmatter атома</div>
+    <div class="code-body"><span class="cc">---</span>
+<span class="ck">id</span>: AUTH-REG-001
+<span class="ck">type</span>: use-case          <span class="cc"># system | domain | aggregate | use-case | scenario</span>
+<span class="ck">parent</span>: AUTH
+<span class="ck">title</span>: "Регистрация пользователя"
+<span class="ck">status</span>: draft            <span class="cc"># draft → review → ready → implemented → deprecated</span>
+<span class="ck">change_class</span>: additive   <span class="cc"># breaking | additive | compatible</span>
+<span class="ck">actors</span>: [Guest]
+<span class="ck">emits</span>: [UserRegistered]
+<span class="ck">consumes</span>: []
+<span class="ck">owners</span>:
+  <span class="cv">analyst</span>: "@anya"
+  <span class="cs">developer</span>: "@dev"
+  <span class="ct">tester</span>: "@qa"
+<span class="cc">---</span></div>
+  </div>
+
+  <div class="code">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div>секции атома — кто владеет</div>
+    <div class="code-body"><span class="cv">## § Intent</span>               <span class="cc">← Аналитик: бизнес-намерение</span>
+<span class="cv">## § Domain Rules</span>         <span class="cc">← Аналитик: DR-N инварианты</span>
+<span class="ct">## § Acceptance Criteria</span>  <span class="cc">← Тестировщик + Аналитик: Gherkin</span>
+<span class="cv">## § Domain Model Touch</span>   <span class="cc">← Аналитик + Dev: агрегаты, события</span>
+<span class="cv">## § Constraints</span>          <span class="cc">← Аналитик: NFR [PERF] [SEC] [IDMP] [A11Y]</span>
+<span class="ck">## § Open Questions</span>       <span class="cc">← Все: OQ-N blocking / non-blocking</span>
+<span class="ck">## § Decision Log</span>        <span class="cc">← Все: DL-N решения с датой</span>
+<span class="cs">## § Tech Spec</span>           <span class="cc">← Разработчик: API, схемы, архитектура</span>
+<span class="ct">## § Test Plan</span>           <span class="cc">← Тестировщик: TC-NNN конкретные кейсы</span>
+<span class="cs">## § Implementation Notes</span><span class="cc"> ← Разработчик: trade-offs, deps, file map</span></div>
+  </div>
+
+  <!-- Git -->
+  <h2 id="git">Git-конвенции</h2>
+
+  <h3>Ветвление</h3>
+  <div class="code">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div>git branching model</div>
+    <div class="code-body"><span class="ck">main</span>
+├── <span class="cv">spec/</span>AUTH-REG-001         <span class="cc">← только spec.md файлы</span>
+├── <span class="cs">feat/</span>AUTH-REG-001         <span class="cc">← код реализации</span>
+├── <span class="ct">test/</span>AUTH-REG-001         <span class="cc">← тесты</span>
+└── release/2026-Q1-sprint-3  <span class="cc">← сборка</span></div>
+  </div>
+
+  <h3>Commit messages</h3>
+  <div class="code">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div>формат коммитов</div>
+    <div class="code-body"><span class="cv">spec</span>(AUTH-REG-001): add registration use case  <span class="badge additive" style="font-size:10px">additive</span>
+<span class="cs">feat</span>(AUTH-REG-001): implement registration endpoint
+<span class="ct">test</span>(AUTH-REG-001): add AC coverage for email-taken
+<span class="ck">fix</span>(AUTH-REG-001): handle race condition           <span class="badge breaking" style="font-size:10px">breaking</span></div>
+  </div>
+
+  <!-- Amendments -->
+  <h2 id="amendments">Правки (Amendments)</h2>
+
+  <p>При изменении существующего атома оркестратор <strong>классифицирует изменение</strong>:</p>
+
+  <p>
+    <span class="badge compatible">compatible</span> — уточнение формулировки без смены поведения<br>
+    <span class="badge additive">additive</span> — новый сценарий, новое DR, расширение<br>
+    <span class="badge breaking">breaking</span> — изменение DR, удаление сценария, смена инварианта
+  </p>
+
+  <div class="callout warn">
+    <strong>Breaking changes</strong> требуют impact-анализа: найти все зависимые атомы (parent, consumes, emits), показать пользователю, получить подтверждение, обновить все затронутые атомы, пройти gates заново.
+  </div>
+
+  <!-- Skill Setup -->
+  <h2 id="skill-setup">Установка SKILL.md</h2>
+
+  <p>Чтобы агент заработал по этой методологии, поместите скилл в директорию <code>/mnt/skills/</code>:</p>
+
+  <div class="code">
+    <div class="code-header"><div class="code-dots"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div></div>структура скилла</div>
+    <div class="code-body">atomic-spec-orchestrator/
+├── <span class="ck">SKILL.md</span>                     <span class="cc">← главные инструкции оркестратора</span>
+├── references/
+│   ├── <span class="cv">analyst.md</span>               <span class="cc">← детальный reference для Аналитика</span>
+│   ├── <span class="cs">developer.md</span>             <span class="cc">← детальный reference для Разработчика</span>
+│   └── <span class="ct">tester.md</span>                <span class="cc">← детальный reference для Тестировщика</span>
+└── assets/
+    └── atom-template.spec.md    <span class="cc">← шаблон нового атома</span></div>
+  </div>
+
+  <p>Агент читает <code>SKILL.md</code> при триггере, затем подгружает нужный <code>references/*.md</code> при переключении роли. Шаблон из <code>assets/</code> используется при создании нового атома.</p>
+
+</main>
+</div>
+
+<script>
+// Active nav link on scroll
+const links = document.querySelectorAll('.nav-link');
+const sections = [...links].map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+
+function updateActive() {
+  let current = '';
+  for (const s of sections) {
+    if (s.getBoundingClientRect().top <= 120) current = s.id;
+  }
+  links.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateActive, { passive: true });
+</script>
+
+</body>
+</html>
