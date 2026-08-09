@@ -1,28 +1,16 @@
 # Atomic Spec — AI Agent Skill
 
-Скилл для Claude Code, который оркестрирует разработку по методологии Atomic Spec.
-
-## Установка
-
-1. Скопируйте директорию `skill/` в `~/.claude/skills/atomic-spec-orchestrator/`:
+Канонический способ установки:
 
 ```bash
-cp -r skill/ ~/.claude/skills/atomic-spec-orchestrator/
+apm install svetlyak40wt/atomic-spec --target agent-skills
 ```
 
-2. Переименуйте файлы:
-```
-~/.claude/skills/atomic-spec-orchestrator/
-├── SKILL.md
-├── references/
-│   ├── analyst.md
-│   ├── developer.md
-│   └── tester.md
-└── assets/
-    └── atom-template.spec.md
-```
+APM установит bundle из `skills/atomic-spec-orchestrator/` в `.agents/skills/atomic-spec-orchestrator/`.
 
-3. Claude Code автоматически обнаружит скилл и будет использовать его при работе с `*.spec.md` файлами.
+## Ручная установка
+
+Если нужен legacy-способ без APM, скопируйте содержимое `skill/` или `skills/atomic-spec-orchestrator/` в директорию скиллов вашего агента.
 
 ## Использование
 
