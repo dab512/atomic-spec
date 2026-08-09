@@ -64,10 +64,10 @@ Atomic Spec создан для выполнения AI-агентами. Вкл
 Установите скилл — и ваш AI-агент становится полноценным практиком Atomic Spec.
 
 ```bash
-apm install svetlyak40wt/atomic-spec --target agent-skills
+apm install dab512/atomic-spec --target agent-skills
 ```
 
-APM установит bundle из [`skills/atomic-spec-orchestrator/`](skills/atomic-spec-orchestrator/) в `.agents/skills/atomic-spec-orchestrator/`. Legacy-каталог [`skill/`](skill/) оставлен для ручной установки и обратной совместимости.
+APM установит bundle из [`skills/atomic-spec-orchestrator/`](skills/atomic-spec-orchestrator/) в `.agents/skills/atomic-spec-orchestrator/`.
 
 ```
 Вы: "Спроектируй фичу регистрации пользователя"
@@ -129,7 +129,6 @@ atomic-spec/
 │       │   └── tester.md
 │       └── assets/
 │           └── atom-template.spec.md
-├── skill/                       # Legacy single-skill layout
 ├── specs/                       # Мета: Atomic Spec описывает сам себя
 │   ├── system.spec.md
 │   └── methodology/

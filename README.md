@@ -64,10 +64,10 @@ Atomic Spec is designed to be executed by AI agents. The included **Orchestrator
 Install the skill and your AI agent becomes a full Atomic Spec practitioner.
 
 ```bash
-apm install svetlyak40wt/atomic-spec --target agent-skills
+apm install dab512/atomic-spec --target agent-skills
 ```
 
-APM installs the bundle from [`skills/atomic-spec-orchestrator/`](skills/atomic-spec-orchestrator/) into `.agents/skills/atomic-spec-orchestrator/`. The legacy [`skill/`](skill/) directory is kept for manual installs and backward compatibility.
+APM installs the bundle from [`skills/atomic-spec-orchestrator/`](skills/atomic-spec-orchestrator/) into `.agents/skills/atomic-spec-orchestrator/`.
 
 ```
 You: "Design a user registration feature"
@@ -129,7 +129,6 @@ atomic-spec/
 │       │   └── tester.md
 │       └── assets/
 │           └── atom-template.spec.md
-├── skill/                       # Legacy single-skill layout
 ├── specs/                       # Meta: Atomic Spec describes itself
 │   ├── system.spec.md
 │   └── methodology/

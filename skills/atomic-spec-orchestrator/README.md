@@ -4,10 +4,10 @@
 
 ## Установка
 
-1. Скопируйте директорию `skill/` в `~/.claude/skills/atomic-spec-orchestrator/`:
+1. Скопируйте директорию `skills/atomic-spec-orchestrator/` в `~/.claude/skills/atomic-spec-orchestrator/`:
 
 ```bash
-cp -r skill/ ~/.claude/skills/atomic-spec-orchestrator/
+cp -r skills/atomic-spec-orchestrator/ ~/.claude/skills/atomic-spec-orchestrator/
 ```
 
 2. Переименуйте файлы:

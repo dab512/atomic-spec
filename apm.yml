@@ -1,6 +1,7 @@
 name: atomic-spec
 version: 0.1.0
-description: Atomic Spec methodology and orchestrator skill for AI-driven specification, implementation, and testing workflows.
+description: Atomic Spec methodology and orchestrator skill for AI-driven 
+  specification, implementation, and testing workflows.
 author: Alexander Artemenko
 license: MIT
 homepage: https://dab512.github.io/atomic-spec/
