@@ -54,14 +54,20 @@ See [Getting Started](docs/getting-started.md) for a detailed walkthrough.
 
 ## AI Agent Orchestrator
 
-Atomic Spec is designed to be executed by AI agents. The included **Orchestrator Skill** for [Claude Code](https://claude.ai/claude-code) drives the full pipeline:
+Atomic Spec is designed to be executed by AI agents. The included **Orchestrator Skill** drives the full pipeline:
 
 1. **Decomposes** a task into atoms (spec files)
 2. **Switches** between Analyst → Developer → Tester agent roles
 3. **Validates** artifacts at each Gate before passing to the next role
 4. **Follows** git conventions for branches, commits, and PRs
 
-Install the skill and your AI agent becomes a full Atomic Spec practitioner. See [`skill/`](skill/) directory and [installation instructions](skill/README.md).
+Install the skill and your AI agent becomes a full Atomic Spec practitioner.
+
+```bash
+apm install dab512/atomic-spec --target agent-skills
+```
+
+APM installs the bundle from [`skills/atomic-spec-orchestrator/`](skills/atomic-spec-orchestrator/) into `.agents/skills/atomic-spec-orchestrator/`.
 
 ```
 You: "Design a user registration feature"
@@ -90,9 +96,9 @@ Done: spec + code + tests, all traced to atoms.
 
 Detailed guides for each AI agent role:
 
-- [Analyst Agent](skill/references/analyst.md) — Intent, Domain Rules, AC, Constraints
-- [Developer Agent](skill/references/developer.md) — Tech Spec, API, Code, Implementation Notes
-- [Tester Agent](skill/references/tester.md) — Test Plan, Coverage Matrix, Platform Tests
+- [Analyst Agent](skills/atomic-spec-orchestrator/references/analyst.md) — Intent, Domain Rules, AC, Constraints
+- [Developer Agent](skills/atomic-spec-orchestrator/references/developer.md) — Tech Spec, API, Code, Implementation Notes
+- [Tester Agent](skills/atomic-spec-orchestrator/references/tester.md) — Test Plan, Coverage Matrix, Platform Tests
 
 ## Meta-Specification
 
@@ -114,14 +120,15 @@ atomic-spec/
 │   ├── git-conventions.md
 │   ├── change-types.md
 │   └── amendments.md
-├── skill/                       # AI agent skill (Claude Code)
-│   ├── SKILL.md                 # Orchestrator prompt
-│   ├── references/              # Role reference guides
-│   │   ├── analyst.md
-│   │   ├── developer.md
-│   │   └── tester.md
-│   └── assets/
-│       └── atom-template.spec.md
+├── skills/
+│   └── atomic-spec-orchestrator/ # APM / Agent Skills bundle
+│       ├── SKILL.md
+│       ├── references/
+│       │   ├── analyst.md
+│       │   ├── developer.md
+│       │   └── tester.md
+│       └── assets/
+│           └── atom-template.spec.md
 ├── specs/                       # Meta: Atomic Spec describes itself
 │   ├── system.spec.md
 │   └── methodology/
