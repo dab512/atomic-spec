@@ -12,13 +12,13 @@ import unittest
 from test_detector import guard, NODE, MODULES, P
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Кеш не должен скрывать новые нарушения исходника, политики, реестра или текста требования.
 class ResultCacheTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # Сохранённый результат можно использовать лишь для тех же исходников, политики и авторитетного источника требований.
     def fixture(self, root):
-        config = P / "tests/fixtures/skillstore-policy.yaml"
+        config = P / "tests/fixtures/sample-policy.yaml"
         (root / "policy.yaml").write_bytes(config.read_bytes())
         directory = root / guard.DEFAULT_SPEC_ROOT
         directory.mkdir(parents=True)
@@ -33,7 +33,7 @@ class ResultCacheTests(unittest.TestCase):
             )
         return directory
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # Переиспользованный результат обязан сохранять область и диагностики действительной проверки, а не подменять их прежним окружением.
     def invoke(self, root, *extra, files=None):
         output = io.StringIO()
@@ -59,7 +59,7 @@ class ResultCacheTests(unittest.TestCase):
             )
         return code, json.loads(output.getvalue())
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # После первого расчёта оба файла попадают в кеш; изменение одного не сбрасывает независимый второй.
     def test_hits_and_one_changed_source(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -79,7 +79,7 @@ class ResultCacheTests(unittest.TestCase):
             self.assertEqual(report["cache"]["misses"], 1)
             self.assertTrue(any(d["code"] == "SPEC_COVER" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # Даже изменение комментария YAML сбрасывает прежние записи, а не только смена семантики правил.
     def test_any_yaml_change_invalidates_cache(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -93,7 +93,7 @@ class ResultCacheTests(unittest.TestCase):
             self.assertEqual(report["cache"]["hits"], 0)
             self.assertEqual(report["cache"]["misses"], 2)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # Изменение спеки или реестра заставляет заново проверить существование пункта и не сохраняет старый PASS.
     def test_specification_and_registry_invalidate_results(self):
         for target in ["cache.spec.md", "registry.json"]:
@@ -111,7 +111,7 @@ class ResultCacheTests(unittest.TestCase):
                 self.assertEqual(report["cache"]["hits"], 0)
                 self.assertTrue(any(d["code"] == "SPEC004" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # Повреждённая запись пересчитывается, а явный no-cache обходит даже исправные сохранённые результаты.
     def test_corruption_and_explicit_bypass(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -128,7 +128,7 @@ class ResultCacheTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertNotIn("cache", report)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+    # atomic-spec://ATOMIC-GUARD-001/DR-1
     # Неподдерживаемые и исключённые файлы не могут блокировать допуск из-за своих байтов, независимо от кеша.
     def test_binary_and_policy_exclusions_are_never_read(self):
         for name in ["image.png", "pnpm-lock.yaml", "excluded.py"]:
@@ -162,7 +162,7 @@ class ResultCacheTests(unittest.TestCase):
                                 self.assertEqual(cached[field], plain[field], field)
                             self.assertNotIn(name, {x["file"] for x in cached["files"]})
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # Изменение исключений отменяет прежний допуск и не позволяет кешу скрыть ставший обязательным исходник.
     def test_exclusion_change_rechecks_source(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -186,7 +186,7 @@ class ResultCacheTests(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertTrue(any(x["file"] == "a.py" for x in report["diagnostics"] if x["severity"] == "error"))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+    # atomic-spec://ATOMIC-GUARD-001/DR-1
     # Настоящие бинарные данные вне области анализа не должны менять код завершения при включении кеша.
     def test_real_binary_png_matches_uncached_result(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -201,7 +201,7 @@ class ResultCacheTests(unittest.TestCase):
             self.assertEqual(actual["diagnostics"], expected["diagnostics"])
             self.assertEqual(actual["cache"]["stored"], 0)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+    # atomic-spec://ATOMIC-GUARD-001/DR-1
     # Исключённый файл не требует чтения ни текущей, ни базовой ревизии, даже если сам файл недоступен.
     def test_excluded_base_revision_and_missing_file_are_not_read(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -225,7 +225,7 @@ class ResultCacheTests(unittest.TestCase):
             self.assertEqual(report["excluded"][0]["file"], "missing.png")
             self.assertEqual(report["cache"]["misses"], 0)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+    # atomic-spec://ATOMIC-GUARD-001/DR-24
     # Разные записи пути к одному исходнику не должны скрывать его нарушения при сборке кешированного отчёта.
     def test_path_alias_cannot_drop_source_errors(self):
         with tempfile.TemporaryDirectory() as folder:

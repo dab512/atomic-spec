@@ -13,7 +13,7 @@ from unittest.mock import patch
 from test_detector import guard, GO_PARSER, NODE, MODULES, SPEC
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+# atomic-spec://ATOMIC-GUARD-001/DR-10
 # Степень нарушения определяет допуск: предупреждения разрешены, ошибки покрытия или достоверности результата блокируют.
 class SeverityTests(unittest.TestCase):
     def run_cli(
@@ -54,7 +54,7 @@ class SeverityTests(unittest.TestCase):
             ]
             if not raw:
                 arguments.append("--json")
-            # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+            # atomic-spec://ATOMIC-GUARD-001/DR-10
             # Вывод о допуске изменения должен относиться к его действительным байтам; внешний статус VCS не заменяет проверку кода.
             original = guard.Repository.read
 
@@ -77,7 +77,7 @@ class SeverityTests(unittest.TestCase):
                 status = guard.main(arguments)
             return status, output.getvalue() if raw else json.loads(output.getvalue())
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Проверка только с предупреждениями завершается успешно.
     def test_warning_only_check_passes(self):
         status, report = self.run_cli({"a.py": "RETRY_LIMIT = 6\n"}, command="check")
@@ -87,7 +87,7 @@ class SeverityTests(unittest.TestCase):
         self.assertEqual(report["schema_version"], 2)
         self.assertEqual(report["summary"], {"error": 0, "warning": 1})
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Функция без обязательной аннотации блокирует результат.
     def test_missing_function_blocks(self):
         status, report = self.run_cli({"a.py": "def work():\n    return 1\n"}, command="check")
@@ -95,7 +95,7 @@ class SeverityTests(unittest.TestCase):
         self.assertFalse(report["complete"])
         self.assertEqual(report["summary"], {"error": 1, "warning": 0})
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Смешанный отчёт сохраняет ошибки и предупреждения одновременно.
     def test_mixed_diagnostics_keep_both_levels(self):
         status, report = self.run_cli({"a.py": "LIMIT = 6\ndef work():\n    return 1\n"})
@@ -103,7 +103,7 @@ class SeverityTests(unittest.TestCase):
         self.assertEqual(report["summary"], {"error": 1, "warning": 1})
         self.assertEqual({d["severity"] for d in report["diagnostics"]}, {"error", "warning"})
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # SQL-кандидат в размеченной функции остаётся предупреждением.
     def test_sql_in_annotated_function_is_warning(self):
         text = '# atomic-spec://TEST/DR-2\n# Execute the selected query.\ndef work(db):\n    db.execute("SELECT 1")\n'
@@ -112,7 +112,7 @@ class SeverityTests(unittest.TestCase):
         self.assertEqual(report["summary"], {"error": 0, "warning": 1})
         self.assertEqual(report["diagnostics"][0]["node_kind"], "SQLQuery")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+    # atomic-spec://ATOMIC-GUARD-001/DR-4
     # Невалидная ссылка константы сохраняет уровень ошибки.
     def test_invalid_reference_on_constant_is_error(self):
         text = "# atomic-spec://TEST/DR-99\n# Upper retry bound.\nLIMIT = 6\n"
@@ -121,7 +121,7 @@ class SeverityTests(unittest.TestCase):
         self.assertEqual(report["diagnostics"][0]["code"], "SPEC004")
         self.assertEqual(report["diagnostics"][0]["severity"], "error")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # Отсутствие пояснения у ссылки константы не понижается до предупреждения.
     def test_missing_prose_on_constant_is_error(self):
         status, report = self.run_cli({"a.py": "# atomic-spec://TEST/DR-2\nLIMIT = 6\n"})
@@ -129,7 +129,7 @@ class SeverityTests(unittest.TestCase):
         self.assertEqual(report["diagnostics"][0]["code"], "SPEC002")
         self.assertEqual(report["diagnostics"][0]["severity"], "error")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Синтаксический сбой является ошибкой анализа.
     def test_syntax_failure_is_error(self):
         status, report = self.run_cli({"a.py": "def work(:\n"})
@@ -137,7 +137,7 @@ class SeverityTests(unittest.TestCase):
         self.assertEqual(report["diagnostics"][0]["code"], "SPEC008")
         self.assertEqual(report["diagnostics"][0]["severity"], "error")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Сигнал плотности не блокирует даже при корректной аннотации блока.
     def test_density_is_nonblocking_even_with_valid_annotation(self):
         text = "# atomic-spec://TEST/DR-2\n# Execute three phases.\ndef work():\n    prepare()\n    reserve()\n    persist()\n"
@@ -146,7 +146,7 @@ class SeverityTests(unittest.TestCase):
         self.assertEqual(report["summary"], {"error": 0, "warning": 1})
         self.assertEqual(report["diagnostics"][0]["code"], "SPEC010")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-11
+    # atomic-spec://ATOMIC-GUARD-001/DR-11
     # Markdown явно показывает уровень диагностики.
     def test_markdown_prints_severity(self):
         _, text = self.run_cli({"a.py": "LIMIT = 6\ndef work():\n    return 1\n"}, raw=True)
@@ -155,7 +155,7 @@ class SeverityTests(unittest.TestCase):
         self.assertIn("error SPEC001 · 1", text)
         self.assertIn("a.py:2", text)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+    # atomic-spec://ATOMIC-GUARD-001/DR-4
     # Невалидная ссылка оставляет контекст неполным.
     def test_getcontext_invalid_reference_stays_incomplete(self):
         text = "# atomic-spec://TEST/DR-99\n# Upper retry bound.\nLIMIT = 6\n"
@@ -166,7 +166,7 @@ class SeverityTests(unittest.TestCase):
                 self.assertFalse(report["complete"])
                 self.assertEqual(report["summary"]["error"], 1)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Выбор языка исходника не должен сам по себе менять рекомендательный характер одинакового синтаксического кандидата.
     def test_real_adapters_are_consistent_for_advisory_candidates(self):
         for name, text in [
@@ -180,7 +180,7 @@ class SeverityTests(unittest.TestCase):
                 self.assertGreater(report["summary"]["warning"], 0)
                 self.assertEqual(report["summary"]["error"], 0)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Ключевое слово в имени не понижает структурное обязательство.
     def test_structural_obligation_not_downgraded_by_keyword(self):
         for kind, role in [
@@ -208,7 +208,7 @@ class SeverityTests(unittest.TestCase):
         )
         self.assertEqual(guard.annotation_severity({"kind": "FutureCandidate"}), "warning")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Профиль не меняет тяжесть уже выбранного legacy-кандидата.
     def test_profile_does_not_change_selected_candidate_severity(self):
         for profile in ("strict", "grouped", "tuned"):

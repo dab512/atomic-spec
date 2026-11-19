@@ -10,7 +10,7 @@ import tempfile
 import time
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Эквивалентные служебные данные имеют один ключ; изменения исходных байтов политики всё равно обязаны сбрасывать прежний результат.
 def digest(value):
     data = json.dumps(
@@ -23,7 +23,7 @@ def digest(value):
     return hashlib.sha256(data.encode()).hexdigest()
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Повторное использование результата допустимо только для неизменившегося содержимого зависимости; отсутствие файла не подтверждает его прежнюю версию.
 def file_hash(path):
     if not path or not Path(path).is_file():
@@ -35,7 +35,7 @@ def file_hash(path):
     return value.hexdigest()
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Изменившийся проверяющий инструмент не может полагаться на прежний PASS: новые правила могли обнаружить ранее пропущенное нарушение.
 def implementation(args):
     module = Path(__file__).resolve().parent
@@ -65,7 +65,7 @@ def implementation(args):
     )
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Сохранённый PASS действителен только при целостности записи и актуальности всех требований, на которых он основан.
 def load(path, key, repo):
     try:
@@ -96,7 +96,7 @@ def load(path, key, repo):
         return None
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Недоступность кеша не освобождает от проверки и не должна блокировать корректный код; незавершённая запись не является результатом проверки.
 def store(path, key, report, dependencies):
     temporary = None
@@ -124,7 +124,7 @@ def store(path, key, report, dependencies):
                 pass
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Повторное использование результата одного файла не должно терять его связи с требованиями или приписывать ему локации других файлов.
 def part(report, path):
     result = {
@@ -143,7 +143,7 @@ def part(report, path):
     return result
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-24
+# atomic-spec://ATOMIC-GUARD-001/DR-24
 # Изменение любого входа проверки отменяет прежний допуск файла; неизменившиеся файлы могут переиспользовать результат независимо от остальных.
 def cached_report(args, repo, files, revision, base_revision, analyzer, cacheable):
     started = time.perf_counter()

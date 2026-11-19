@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+// atomic-spec://ATOMIC-GUARD-001/DR-7
 // Проверка синтаксиса не требует выполнения проверяемой программы; тест парсера не должен зависеть от её внешнего окружения.
 func parseFixture(t *testing.T, path, source string) []Unit {
 	t.Helper()
@@ -23,7 +23,7 @@ func parseFixture(t *testing.T, path, source string) []Unit {
 	return result.Units
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+// atomic-spec://ATOMIC-GUARD-001/DR-9
 // Декларативные таблицы правил, лимиты и regex не теряют статус кандидатов из-за отсутствия ветвлений.
 func TestGlobalDeclarations(t *testing.T) {
 	source := `package sample
@@ -70,7 +70,7 @@ var initialized = func() int { scratch := []int{3}; return scratch[0] }()
 	}
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+// atomic-spec://ATOMIC-GUARD-001/DR-17
 // Вспомогательные данные не создают отдельного сценария; использованные табличные случаи остаются видимыми для политики покрытия.
 func TestConsumedTables(t *testing.T) {
 	source := `package sample
@@ -110,7 +110,7 @@ func TestCases(t *testing.T) {
 	}
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+// atomic-spec://ATOMIC-GUARD-001/DR-2
 // Решение внутри вложенного подтеста принадлежит ближайшему сценарию; неподтверждённый Run не получает строгость доказанного сценария.
 func TestRunOwnership(t *testing.T) {
 	source := `package sample
@@ -145,7 +145,7 @@ func TestNested(t *tst.T) {
 	}
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+// atomic-spec://ATOMIC-GUARD-001/DR-9
 // Статический запрос к базе остаётся кандидатом, а похожий текст вне операции с базой не создаёт ложного обязательства.
 func TestSQLQueries(t *testing.T) {
 	source := `package sample
@@ -184,7 +184,7 @@ func f() {
 	}
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+// atomic-spec://ATOMIC-GUARD-001/DR-17
 // Обработка HTTP-ответа внутри фикстуры не является таблицей самостоятельных сценариев и не требует покрытия каждой строки ответа.
 func TestFixtureOwnership(t *testing.T) {
 	source := `package sample
@@ -208,19 +208,19 @@ func TestHTTP(t *testing.T) {
 	}
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+// atomic-spec://ATOMIC-GUARD-001/DR-3
 // URI задаёт ссылку, но не заменяет пояснение; тот же URI в строковом значении не выполняет обязательство разметки.
 func TestBareAtomicURI(t *testing.T) {
 	source := `package sample
-// atomic-spec://SKSTORE-PUBLICATION-001/DR-5
+// atomic-spec://DEMO-PUBLICATION-001/DR-5
 // Reserve before creating a PR.
 func reserve() {}
-var fake = "atomic-spec://SKSTORE-PUBLICATION-001/DR-5"
+var fake = "atomic-spec://DEMO-PUBLICATION-001/DR-5"
 `
 	units := parseFixture(t, "uri.go", source)
 	for _, unit := range units {
 		if unit.Name == "reserve" {
-			if len(unit.Refs) != 1 || unit.Refs[0] != "atomic-spec://SKSTORE-PUBLICATION-001/DR-5" || unit.Description != "Reserve before creating a PR." {
+			if len(unit.Refs) != 1 || unit.Refs[0] != "atomic-spec://DEMO-PUBLICATION-001/DR-5" || unit.Description != "Reserve before creating a PR." {
 				t.Fatalf("wrong bare URI annotation: %+v", unit)
 			}
 		} else if len(unit.Refs) != 0 {

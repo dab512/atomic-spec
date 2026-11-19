@@ -65,10 +65,10 @@
 bash scripts/self-check.sh
 
 # Где реализовано и проверено требование YAML-политики?
-bash scripts/self-check.sh whereused --spec atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+bash scripts/self-check.sh whereused --spec atomic-spec://ATOMIC-GUARD-001/DR-19
 
 # Где встречаются любые пункты собственной спеки?
-bash scripts/self-check.sh whereused --spec atomic-spec://SKSTORE-ATOMIC-GUARD-001 --json --output /tmp/guard-trace.json
+bash scripts/self-check.sh whereused --spec atomic-spec://ATOMIC-GUARD-001 --json --output /tmp/guard-trace.json
 
 # Собрать только требования, связанные с собственными исходниками.
 bash scripts/self-check.sh getcontext brief --output /tmp/guard-context.md
@@ -89,7 +89,7 @@ GOTOOLCHAIN=local GO111MODULE=off go build -o /tmp/atomic-spec-guard-goparser ./
 Пример поиска мест использования требования в каталоге без manifest:
 
 ```bash
-python3 specguard.py whereused --config spec/atomic-spec-guard.yaml --spec-root spec --go-parser /tmp/atomic-spec-guard-goparser --directory tests --spec atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+python3 specguard.py whereused --config spec/atomic-spec-guard.yaml --spec-root spec --go-parser /tmp/atomic-spec-guard-goparser --directory tests --spec atomic-spec://ATOMIC-GUARD-001/DR-19
 ```
 
 Вместо `--directory` можно передать `--files FILE1.go FILE2.ts FILE3.py`. `--directory` рекурсивен, но ограничен 1000 поддерживаемых файлов, 20000 записей каталогов и 16 MiB исходников. Превышение — ошибка, не усечённый успешный результат. Зависимости, VCS, кеши и сборочные каталоги пропускаются; symlink не разыменовываются. Пропуски видны в отчёте. Корень всего репозитория не сканируется.

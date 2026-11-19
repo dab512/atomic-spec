@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+# atomic-spec://ATOMIC-GUARD-001/DR-16
 # Локальная самопроверка обязательна перед отправкой изменений; отсутствие адаптера или зависимости не является успехом.
 set -euo pipefail
 cd "$(dirname "$0")/.."

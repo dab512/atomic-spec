@@ -1,4 +1,4 @@
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-20
+# atomic-spec://ATOMIC-GUARD-001/DR-20
 # Требуем отдельного покрытия самостоятельных сценариев; сигналы вспомогательных блоков остаются рекомендательными.
 version: 1
 files:
@@ -10,7 +10,7 @@ files:
       reason: Зависимости поставщика проверяются в исходном проекте.
     - id: vendor-go
       path: "*/vendor/*"
-      reason: Внешние Go-зависимости не являются кодом SkillStore.
+      reason: Внешние Go-зависимости не являются кодом Sample.
 diagnostics:
   SPEC_FILE:
     severity: error

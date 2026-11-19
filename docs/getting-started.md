@@ -21,7 +21,7 @@ apm install dab512/atomic-spec --target agent-skills
 ```
 
 For a pinned, independently extractable copy, download the release asset
-`atomic-spec-orchestrator-2.0.1.zip` from the GitHub v2.0.1 release and extract it
+`atomic-spec-orchestrator-2.0.2.zip` from the GitHub v2.0.2 release and extract it
 into `.agents/skills/`. Its top-level directory is `atomic-spec-orchestrator`.
 APM compatibility is retained; a live APM service installation is not part of the
 local archive acceptance.

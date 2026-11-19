@@ -20,18 +20,18 @@ CONFIG = json.loads(
     guard.policy_document(
         SimpleNamespace(node=NODE, node_modules=MODULES),
         "policy.yaml",
-        (ROOT / "tests/fixtures/skillstore-policy.yaml").read_text(),
+        (ROOT / "tests/fixtures/sample-policy.yaml").read_text(),
     )
 )
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+# atomic-spec://ATOMIC-GUARD-001/DR-22
 # Языковая конвенция виртуальной фикстуры не меняет русскую политику проекта и не должна скрывать нарушения других правил.
 CONFIG["annotation_language"]["language"] = "en"
 NOTE = "// atomic-spec://TEST/DR-2\n// Meaning of the rule.\n"
 PYNOTE = "# atomic-spec://TEST/DR-2\n# Meaning of the rule.\n"
-PREFIX = "marvel/skillstore/services/"
+PREFIX = "example/sample/services/"
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+# atomic-spec://ATOMIC-GUARD-001/DR-16
 # Покрытие кода и список мест использования требований должны согласованно описывать один исходник при выбранной политике.
 class PolicyTests(unittest.TestCase):
     def run_policy(
@@ -94,7 +94,7 @@ class PolicyTests(unittest.TestCase):
                 code = guard.main(args)
             return code, json.loads(output.getvalue())
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+    # atomic-spec://ATOMIC-GUARD-001/DR-16
     # Файловый минимум отражается в настроенной схеме отчёта.
     def test_file_minimum_and_schema(self):
         code, report = self.run_policy({"a.py": "value = 1\n"})
@@ -103,7 +103,7 @@ class PolicyTests(unittest.TestCase):
         self.assertTrue(any(d["code"] == "SPEC_FILE" for d in report["diagnostics"]))
         self.assertIn("notice", report["summary"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+    # atomic-spec://ATOMIC-GUARD-001/DR-16
     # Заголовочная аннотация выполняет файловый минимум, но не освобождает самостоятельные функции от покрытия.
     def test_file_header_counts_but_does_not_cover_functions(self):
         code, report = self.run_policy({"a.py": PYNOTE + "\nvalue = 1\ndef work():\n    return 1\n"})
@@ -111,14 +111,14 @@ class PolicyTests(unittest.TestCase):
         self.assertTrue(any(d["code"] == "SPEC_COVER" and d["block"] == "work" for d in report["diagnostics"]))
         self.assertEqual(code, 1)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # Файл только с корректным комментарием не получает лишнюю ошибку покрытия.
     def test_comment_only_file(self):
         code, report = self.run_policy({"a.py": PYNOTE})
         self.assertEqual(code, 0)
         self.assertEqual(report["files"][0]["annotations"], 1)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Вложенные решения могут наследовать требование родителя только в пределах разрешённых границ покрытия.
     def test_parent_annotation_covers_decisions(self):
         for path, source in [
@@ -134,14 +134,14 @@ class PolicyTests(unittest.TestCase):
                 self.assertEqual(code, 0, report["diagnostics"])
                 self.assertTrue(any(e["status"] == "covered" for e in report["explanations"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Самостоятельная вложенная функция обязана иметь собственное покрытие и не заимствует требование внешней функции.
     def test_nested_function_cannot_borrow_outer_reference(self):
         code, report = self.run_policy({"a.py": PYNOTE + "def outer():\n    def inner():\n        return 1\n"})
         self.assertEqual(code, 1)
         self.assertTrue(any(d["block"] == "inner" and d["severity"] == "error" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+    # atomic-spec://ATOMIC-GUARD-001/DR-4
     # Исключение синтаксического правила не отменяет валидацию явной ссылки.
     def test_invalid_reference_survives_exclusion(self):
         config = deepcopy(CONFIG)
@@ -160,7 +160,7 @@ class PolicyTests(unittest.TestCase):
         self.assertTrue(any(d.get("exclusion") == "omit" for d in report["diagnostics"]))
         self.assertTrue(any(e.get("exclusion") == "omit" for e in report["explanations"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+    # atomic-spec://ATOMIC-GUARD-001/DR-16
     # Полное исключение файла сохраняет причину в отчёте.
     def test_explicit_file_exclusion_reported(self):
         code, report = self.run_policy({"pkg/node_modules/a.ts": "broken { not source"})
@@ -168,7 +168,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(report["summary"]["notice"], 1)
         self.assertEqual(report["excluded"][0]["exclusion"], "vendor")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+    # atomic-spec://ATOMIC-GUARD-001/DR-1
     # Строковое значение не может исключить исходник из проверки под видом generated-маркера.
     def test_generated_marker_inside_string_does_not_exclude(self):
         for path, source in [
@@ -180,7 +180,7 @@ class PolicyTests(unittest.TestCase):
                 self.assertEqual(code, 1)
                 self.assertEqual(report["excluded"], [])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+    # atomic-spec://ATOMIC-GUARD-001/DR-1
     # Подтверждённый сгенерированный файл исключается явно и не выдаётся за проверенный вручную исходник.
     def test_actual_generated_comment_excludes(self):
         for path, source in [
@@ -193,7 +193,7 @@ class PolicyTests(unittest.TestCase):
                 self.assertEqual(code, 0, report)
                 self.assertEqual(report["summary"]["notice"], 1)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Группа настроек не требует отдельного блокирующего сообщения для каждого скалярного значения.
     def test_yaml_groups_do_not_report_each_scalar(self):
         source = PYNOTE + "vars:\n" + "".join(f"  value{i}: {i}\n" for i in range(50))
@@ -201,7 +201,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(code, 0, report["diagnostics"])
         self.assertLess(len(report["diagnostics"]), 3)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Условие представления остаётся кандидатом, если политика не устанавливает для него отдельного строгого обязательства.
     def test_presentation_conditions_are_advisory(self):
         code, report = self.run_policy(
@@ -212,10 +212,10 @@ class PolicyTests(unittest.TestCase):
             any(d["severity"] == "error" and d["node_kind"] == "BinaryExpression" for d in report["diagnostics"])
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Импортированный alias гейта доступа сохраняет строгое правило.
     def test_named_import_alias_is_access_rule(self):
-        path = PREFIX + "skillstore-frontend/src/routes/example.tsx"
+        path = PREFIX + "sample-frontend/src/routes/example.tsx"
         source = (
             NOTE
             + '\nimport {canDo as allowed} from "../api/backend";\nfunction Card(user){return allowed(user,"manage.all.badges") ? <div/> : null;}'
@@ -224,10 +224,10 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue(any(d["code"] == "SPEC_ACCESS" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Совпадение имени с затенённым импортом не подтверждает известный гейт доступа.
     def test_shadowed_import_is_not_proven_access(self):
-        path = PREFIX + "skillstore-frontend/src/routes/example.tsx"
+        path = PREFIX + "sample-frontend/src/routes/example.tsx"
         source = (
             NOTE
             + '\nimport {canDo} from "../api/backend";\nfunction Card(canDo){return canDo(user,"manage.all.badges");}'
@@ -235,37 +235,37 @@ class PolicyTests(unittest.TestCase):
         _, report = self.run_policy({path: source})
         self.assertFalse(any(d["code"] == "SPEC_ACCESS" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Переименование прямого импорта не снимает обязательство описать гейт или изменение матрицы прав.
     def test_go_import_alias_and_matrix_mutation(self):
-        path = PREFIX + "skillstore/internal/handlers/test.go"
+        path = PREFIX + "sample/internal/handlers/test.go"
         source = (
-            'package handlers\nimport rights "a.yandex-team.ru/marvel/skillstore/services/skillstore/internal/access/actions"\n'
+            'package handlers\nimport rights "code.example.invalid/example/sample/services/sample/internal/access/actions"\n'
             + NOTE
             + "\nfunc work(){rights.ActionRoles[0]=nil;rights.Can(nil,0)}"
         )
         _, report = self.run_policy({path: source})
         self.assertTrue(any(d["code"] == "SPEC_ACCESS" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Изменение матрицы прав требует относящегося к ней покрытия; аннотация несвязанной функции его не заменяет.
     def test_matrix_cell_diff_is_not_hidden_by_unrelated_annotation(self):
-        path = PREFIX + "skillstore/internal/access/actions/actions.go"
+        path = PREFIX + "sample/internal/access/actions/actions.go"
         before = "package actions\n" + NOTE + 'func unrelated(){}\nvar ActionRoles=map[string]bool{"admin":false}\n'
         after = before.replace('"admin":false', '"admin":true')
         _, report = self.run_policy({path: after}, base={path: before}, command="check")
         self.assertTrue(any(d["code"] == "SPEC_ACCESS" and "ActionRoles" in d["block"] for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Пояснение диагностики должно использовать объявленные параметры и соответствовать проверяемому правилу.
     def test_custom_message_parameters(self):
         config = deepcopy(CONFIG)
-        config["diagnostics"]["SPEC_COVER"]["params"] = {"team": "SkillStore"}
+        config["diagnostics"]["SPEC_COVER"]["params"] = {"team": "Sample"}
         config["diagnostics"]["SPEC_COVER"]["message"] = "{team}: {name}"
         _, report = self.run_policy({"a.py": PYNOTE + "\nvalue=1\ndef work(): pass"}, config)
-        self.assertTrue(any(d["message"] == "SkillStore: work" for d in report["diagnostics"]))
+        self.assertTrue(any(d["message"] == "Sample: work" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Пустые строки и комментарии не увеличивают число кодовых строк.
     def test_metrics_ignore_blank_and_comment_lines(self):
         config = deepcopy(CONFIG)
@@ -277,7 +277,7 @@ class PolicyTests(unittest.TestCase):
         _, report = self.run_policy({"a.py": source}, config)
         self.assertFalse(any(d["code"] == "SPEC_SIZE" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Равноприоритетные конфликтующие правила отклоняются явно.
     def test_conflicting_matching_rules_fail(self):
         config = deepcopy(CONFIG)
@@ -293,13 +293,13 @@ class PolicyTests(unittest.TestCase):
             )
             policy.evaluate(facts, None, set())
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Некорректная структура конфигурации не принимается за рабочую политику.
     def test_config_validation(self):
         mutations = [
             lambda c: c.update(version=99),
             lambda c: c.update(typo=True),
-            lambda c: c["profiles"]["base"]["extends"].append("skillstore"),
+            lambda c: c["profiles"]["base"]["extends"].append("sample"),
             lambda c: c["diagnostics"]["SPEC_COVER"].update(message="{name.__class__}"),
             lambda c: c["rules"]["structural"].update(match={"node": {"eq": "invented"}}),
             lambda c: c["rules"]["structural"].update(match={"name": {"regex": "(a+)+"}}),
@@ -313,7 +313,7 @@ class PolicyTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     Policy(json.dumps(config))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Один именованный порог должен одинаково определять срабатывание правила и текст подсказки.
     def test_named_parameter_controls_threshold_and_hint(self):
         config = deepcopy(CONFIG)
@@ -322,7 +322,7 @@ class PolicyTests(unittest.TestCase):
         warning = next(d for d in report["diagnostics"] if d["code"] == "SPEC_SIZE")
         self.assertIn("1 строк", warning["hint"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+    # atomic-spec://ATOMIC-GUARD-001/DR-10
     # Информационный notice не блокирует результат.
     def test_notice_does_not_block(self):
         config = deepcopy(CONFIG)
@@ -332,7 +332,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertEqual(report["summary"]["notice"], 1)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Исключение одного правила не снимает другие обязательства блока.
     def test_rule_exclusion_does_not_remove_other_obligations(self):
         config = deepcopy(CONFIG)
@@ -341,13 +341,13 @@ class PolicyTests(unittest.TestCase):
             "rules": ["access-helpers"],
             "reason": "Only this rule is exempt",
         }
-        config["profiles"]["skillstore"]["exclusions"].append("only-access")
-        path = PREFIX + "skillstore/internal/handlers/types.go"
+        config["profiles"]["sample"]["exclusions"].append("only-access")
+        path = PREFIX + "sample/internal/handlers/types.go"
         _, report = self.run_policy({path: "package handlers\n" + NOTE + "\nfunc userCan() {}"}, config)
         self.assertTrue(any(d["code"] == "SPEC_COVER" for d in report["diagnostics"]))
         self.assertTrue(any(d.get("exclusion") == "only-access" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+    # atomic-spec://ATOMIC-GUARD-001/DR-8
     # Все поддерживаемые адаптеры возвращают измерение AST.
     def test_all_supported_parsers_provide_ast_metric(self):
         from specguard_policy import Facts
@@ -368,7 +368,7 @@ class PolicyTests(unittest.TestCase):
         )
         self.assertTrue(any(u.get("ast_nodes", 0) > 2 for u in facts.units))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+    # atomic-spec://ATOMIC-GUARD-001/DR-2
     # Контекст diff не включает неизменённую соседнюю функцию.
     def test_diff_context_omits_unmodified_function(self):
         before = (
@@ -382,7 +382,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertEqual([x["block"] for x in report["requirements"][0]["locations"]], ["second"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # Похожие на комментарии строки не выполняют файловый минимум.
     def test_comment_lookalikes_never_satisfy_file_minimum(self):
         for path, source in [
@@ -394,7 +394,7 @@ class PolicyTests(unittest.TestCase):
                 _, report = self.run_policy({path: source})
                 self.assertTrue(any(d["code"] == "SPEC_FILE" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+    # atomic-spec://ATOMIC-GUARD-001/DR-16
     # Check и audit применяют одну настроенную политику.
     def test_check_and_audit_apply_same_policy(self):
         source = PYNOTE + "def work(x):\n    if x:\n        return 1\n"
@@ -402,7 +402,7 @@ class PolicyTests(unittest.TestCase):
         check, c = self.run_policy({"a.py": source}, base={"a.py": ""}, command="check")
         self.assertEqual((audit, a["summary"]), (check, c["summary"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+    # atomic-spec://ATOMIC-GUARD-001/DR-2
     # Удалённая функция не создаёт ошибку у следующего объявления.
     def test_deleted_function_does_not_require_annotation_on_next_function(self):
         before = PYNOTE + "\nvalue=1\ndef gone():\n    return 1\ndef keep():\n    return 2\n"
@@ -410,7 +410,7 @@ class PolicyTests(unittest.TestCase):
         code, report = self.run_policy({"a.py": after}, base={"a.py": before}, command="check")
         self.assertEqual(code, 0, report["diagnostics"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+    # atomic-spec://ATOMIC-GUARD-001/DR-2
     # Удаление аннотации не снимает проверку сохранившегося владельца.
     def test_removed_annotation_still_checks_its_surviving_owner(self):
         before = PYNOTE + "def first():\n    return 1\n" + PYNOTE + "def second():\n    return 2\n"
@@ -419,7 +419,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue(any(d["code"] == "SPEC_COVER" and d["block"] == "first" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Неверные типы каталогов дают ошибку конфигурации.
     def test_wrong_catalog_types_are_configuration_errors(self):
         for field, value in [("diagnostic", []), ("check", []), ("coverage", [])]:
@@ -433,7 +433,7 @@ class PolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Policy(json.dumps(config))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Диагностика файлового порога использует измеренное число аннотаций.
     def test_file_threshold_is_measured_in_diagnostic(self):
         config = deepcopy(CONFIG)
@@ -443,7 +443,7 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("1 валидных", issue["message"])
         self.assertIn("требуется 2", issue["message"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Повторяющиеся ключи конфигурации отклоняются.
     def test_duplicate_keys_rejected(self):
         with self.assertRaisesRegex(ValueError, "duplicate"):

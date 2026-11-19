@@ -1,4 +1,4 @@
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+// atomic-spec://ATOMIC-GUARD-001/DR-8
 // Покрытие JS/TS и YAML определяется грамматикой языка: похожая на комментарий строка не подтверждает выполнение требования.
 'use strict';
 const fs = require('node:fs');
@@ -6,7 +6,7 @@ const path = require('node:path');
 const modules = path.resolve(process.argv[2]);
 let ts, yaml;
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+// atomic-spec://ATOMIC-GUARD-001/DR-3
 // URI начинает аннотацию; только последующий текст группы считается её пояснением.
 function annotation(text) {
     const lines = text.split('\n').map(s => s.replace(/^\s*(?:\/\/|\/\*|\*\/?|#)\s?/, '').replace(/\*\/$/, '').trim());
@@ -25,7 +25,7 @@ function annotation(text) {
     return {refs, description: validNotes.join('\n')};
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+// atomic-spec://ATOMIC-GUARD-001/DR-8
 // Каждый блок должен сохранять собственную исходную локацию, даже если его покрывает аннотация другого владельца.
 function location(input, position, kind, start, end, ownerStart = start, ownerEnd = end) {
     const first = position(start);
@@ -39,7 +39,7 @@ function location(input, position, kind, start, end, ownerStart = start, ownerEn
     };
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+// atomic-spec://ATOMIC-GUARD-001/DR-15
 // Известный гейт доступа требует подтверждённого происхождения; совпадение с затенённым именем не доказывает применение правила доступа.
 function policyFacts(input, source, position) {
     const imports = new Map(), shadowed = new Set(), calls = [], comments = new Map(), sizes = new Map();
@@ -84,7 +84,7 @@ function policyFacts(input, source, position) {
     return {sizes, policy_units:calls, comments:[...comments.values()].sort((a,b)=>a.pos-b.pos)};
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+// atomic-spec://ATOMIC-GUARD-001/DR-16
 // Файловое обязательство можно выполнить реальной аннотацией без владельца; такую группу нельзя терять при проверке покрытия.
 function commentFacts(input, position, comments) {
     const groups=[];
@@ -99,7 +99,7 @@ function commentFacts(input, position, comments) {
     }).filter(u=>u.refs.length);
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+// atomic-spec://ATOMIC-GUARD-001/DR-9
 // Решения и конфигурации должны оставаться видимыми кандидатами; наличие свойства само по себе не доказывает отдельного бизнес-правила.
 function typescript(input) {
     ts ??= require(path.join(modules, 'typescript'));
@@ -123,7 +123,7 @@ function typescript(input) {
         ts.SyntaxKind.ForOfStatement, ts.SyntaxKind.WhileStatement, ts.SyntaxKind.DoStatement, ts.SyntaxKind.CatchClause]);
     const logical = new Set([ts.SyntaxKind.AmpersandAmpersandToken, ts.SyntaxKind.BarBarToken, ts.SyntaxKind.QuestionQuestionToken]);
     const configNames = new Set(['server', 'proxy', 'options', 'menuItems', 'docsItems', 'footerItems', 'logo', 'topAlert']);
-    // atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+    // atomic-spec://ATOMIC-GUARD-001/DR-17
     // Подготовка параметров теста не создаёт второй самостоятельный сценарий и не требует дублировать его пояснение.
     const testName = node => {
         if (!ts.isCallExpression(node)) return undefined;
@@ -178,7 +178,7 @@ function typescript(input) {
             || line(expression.getStart(source)) - line(previous.end) > 1) return [];
         return ts.getTrailingCommentRanges(input.source, previous.getStart(source) + 1) || [];
     };
-    // atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    // atomic-spec://ATOMIC-GUARD-001/DR-9
     // Статический SQL остаётся кандидатом независимо от формы записи; неизвестные значения параметров нельзя считать установленной логикой запроса.
     const sqlCandidate = node => {
         const terminal = expr => ts.isIdentifier(expr) ? expr.text : ts.isPropertyAccessExpression(expr) ? expr.name.text : '';
@@ -299,7 +299,7 @@ function typescript(input) {
     return {path: input.path, facts_version:2, units, tokens, policy_units:policy.policy_units, annotations:commentFacts(input,position,policy.comments), generated:policy.comments.some(c=>/^(?:\/\/|\/\*)\s*(?:Code generated .* DO NOT EDIT\.|@generated\b)/i.test(input.source.slice(c.pos,c.end))), code_lines:[...codeLines]};
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+// atomic-spec://ATOMIC-GUARD-001/DR-8
 // Аннотация YAML должна относиться к своему ключу или значению; текст строкового значения не выполняет обязательство комментария.
 function configuration(input) {
     yaml ??= require(path.join(modules, 'yaml'));
@@ -408,7 +408,7 @@ function configuration(input) {
 }
 
 const inputs = JSON.parse(fs.readFileSync(0, 'utf8'));
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+// atomic-spec://ATOMIC-GUARD-001/DR-8
 // Ошибка одного исходника не отменяет полезные результаты остальных, но не позволяет считать всю выборку успешно разобранной.
 function parseInput(input) {
     try { return /\.ya?ml$/.test(input.path) ? configuration(input) : typescript(input); }

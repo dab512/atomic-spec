@@ -1,5 +1,5 @@
-# atomic-spec://SKSTORE-SPEC-TRACE-001/DR-19
-# Политика SkillStore: обязательные ссылки, рекомендательные сигналы и явные исключения.
+# atomic-spec://DEMO-SPEC-TRACE-001/DR-19
+# Политика Sample: обязательные ссылки, рекомендательные сигналы и явные исключения.
 version: 1
 files:
   minimum_annotations: 1
@@ -10,9 +10,9 @@ files:
       reason: Зависимости поставщика проверяются в исходном проекте.
     - id: vendor-go
       path: "*/vendor/*"
-      reason: Внешние Go-зависимости не являются кодом SkillStore.
-    - id: generated-skillstore-ci
-      path: "marvel/skillstore/services/skillstore/a.yaml"
+      reason: Внешние Go-зависимости не являются кодом Sample.
+    - id: generated-sample-ci
+      path: "example/sample/services/sample/a.yaml"
       reason: Файл полностью генерируется из размеченного ci/stub.yaml; генератор не сохраняет комментарии.
 diagnostics:
   SPEC_FILE:
@@ -243,7 +243,7 @@ rules:
     match:
       all:
         - path:
-            glob: "*/skillstore/internal/access/actions/actions.go"
+            glob: "*/sample/internal/access/actions/actions.go"
         - name:
             in:
               - ActionRoles
@@ -259,7 +259,7 @@ rules:
     match:
       all:
         - path:
-            glob: "*/skillstore/internal/access/actions/actions.go"
+            glob: "*/sample/internal/access/actions/actions.go"
         - kind:
             eq: "*ast.ValueSpec"
     check: annotation
@@ -275,10 +275,10 @@ rules:
               - declaration
         - any:
             - symbol:
-                eq: a.yandex-team.ru/marvel/skillstore/services/skillstore/internal/access/actions#Can
+                eq: code.example.invalid/example/sample/services/sample/internal/access/actions#Can
             - all:
                 - path:
-                    glob: "*/skillstore/internal/handlers/*.go"
+                    glob: "*/sample/internal/handlers/*.go"
                 - symbol:
                     in:
                       - local:userCan
@@ -290,10 +290,10 @@ rules:
                       - local:canUnhideOwnVersion
             - any:
                 - symbol:
-                    eq: a.yandex-team.ru/marvel/skillstore/services/skillstore/internal/access/actions#ActionRoles
+                    eq: code.example.invalid/example/sample/services/sample/internal/access/actions#ActionRoles
                 - all:
                     - path:
-                        glob: "*/skillstore/internal/access/actions/*.go"
+                        glob: "*/sample/internal/access/actions/*.go"
                     - symbol:
                         in:
                           - local:ActionRoles
@@ -308,7 +308,7 @@ rules:
         - node:
             eq: call
         - symbol:
-            glob: "*/skillstore-frontend/src/api/backend#canDo"
+            glob: "*/sample-frontend/src/api/backend#canDo"
     check: annotation
     coverage: ancestor
     priority: 100
@@ -317,7 +317,7 @@ rules:
     match:
       all:
         - path:
-            glob: "*/skillstore/internal/handlers/types.go"
+            glob: "*/sample/internal/handlers/types.go"
         - node:
             eq: function
         - name:
@@ -337,7 +337,7 @@ rules:
     match:
       all:
         - path:
-            glob: "*/skillstore-frontend/src/api/backend.ts"
+            glob: "*/sample-frontend/src/api/backend.ts"
         - name:
             in:
               - canDo
@@ -380,7 +380,7 @@ rules:
       any:
         - all:
             - path:
-                glob: "*/skillstore/internal/access/abc/client.go"
+                glob: "*/sample/internal/access/abc/client.go"
             - name:
                 in:
                   - ValidLogin
@@ -394,13 +394,13 @@ rules:
                   - type roleRef
         - all:
             - path:
-                glob: "*/skillstore/internal/access/abc/source_ownership.go"
+                glob: "*/sample/internal/access/abc/source_ownership.go"
             - name:
                 in:
                   - singleWantedLogin
         - all:
             - path:
-                glob: "*/skillstore/internal/arcadia/syncrepo/publication_queue.go"
+                glob: "*/sample/internal/repository/syncrepo/publication_queue.go"
             - name:
                 in:
                   - type publicationScanner
@@ -408,7 +408,7 @@ rules:
                   - method publicationQueueList
         - all:
             - path:
-                glob: "*/skillstore/internal/readonly/gate.go"
+                glob: "*/sample/internal/readonly/gate.go"
             - name:
                 in:
                   - type Gate
@@ -416,26 +416,26 @@ rules:
                   - ActiveFromContext
         - all:
             - path:
-                glob: "*/skillstore-frontend/src/components/pipeline-card.tsx"
+                glob: "*/sample-frontend/src/components/pipeline-card.tsx"
             - name:
                 in:
                   - time
                   - prLink
         - all:
             - path:
-                glob: "*/skillstore-frontend/src/components/ci-admission-settings.tsx"
+                glob: "*/sample-frontend/src/components/ci-admission-settings.tsx"
             - name:
                 in:
                   - formatTime
         - all:
             - path:
-                glob: "*/skillstore-frontend/vite.config.ts"
+                glob: "*/sample-frontend/vite.config.ts"
             - name:
                 in:
                   - configResolved
         - all:
             - path:
-                glob: "*/skillstore-frontend/src/components/api-error-alert.tsx"
+                glob: "*/sample-frontend/src/components/api-error-alert.tsx"
             - name:
                 eq: humanize
     check: annotation
@@ -579,7 +579,7 @@ exclusions:
         any:
           - all:
               - path:
-                  glob: "*/skillstore/internal/access/abc/client.go"
+                  glob: "*/sample/internal/access/abc/client.go"
               - name:
                   in:
                     - ValidLogin
@@ -593,13 +593,13 @@ exclusions:
                     - type roleRef
           - all:
               - path:
-                  glob: "*/skillstore/internal/access/abc/source_ownership.go"
+                  glob: "*/sample/internal/access/abc/source_ownership.go"
               - name:
                   in:
                     - singleWantedLogin
           - all:
               - path:
-                  glob: "*/skillstore/internal/arcadia/syncrepo/publication_queue.go"
+                  glob: "*/sample/internal/repository/syncrepo/publication_queue.go"
               - name:
                   in:
                     - type publicationScanner
@@ -607,7 +607,7 @@ exclusions:
                     - method publicationQueueList
           - all:
               - path:
-                  glob: "*/skillstore/internal/readonly/gate.go"
+                  glob: "*/sample/internal/readonly/gate.go"
               - name:
                   in:
                     - type Gate
@@ -615,26 +615,26 @@ exclusions:
                     - ActiveFromContext
           - all:
               - path:
-                  glob: "*/skillstore-frontend/src/components/pipeline-card.tsx"
+                  glob: "*/sample-frontend/src/components/pipeline-card.tsx"
               - name:
                   in:
                     - time
                     - prLink
           - all:
               - path:
-                  glob: "*/skillstore-frontend/src/components/ci-admission-settings.tsx"
+                  glob: "*/sample-frontend/src/components/ci-admission-settings.tsx"
               - name:
                   in:
                     - formatTime
           - all:
               - path:
-                  glob: "*/skillstore-frontend/vite.config.ts"
+                  glob: "*/sample-frontend/vite.config.ts"
               - name:
                   in:
                     - configResolved
           - all:
               - path:
-                  glob: "*/skillstore-frontend/src/components/api-error-alert.tsx"
+                  glob: "*/sample-frontend/src/components/api-error-alert.tsx"
               - name:
                   eq: humanize
     rules:
@@ -688,7 +688,7 @@ profiles:
       - yaml-sections
       - ci-jobs
     exclusions: []
-  skillstore:
+  sample:
     extends:
       - frontend
       - configuration
@@ -716,7 +716,7 @@ profiles:
       - technical-decisions
       - helper-decisions
 default_profiles:
-  - skillstore
+  - sample
 parameters:
   large_block_lines: 100
 annotation_language:

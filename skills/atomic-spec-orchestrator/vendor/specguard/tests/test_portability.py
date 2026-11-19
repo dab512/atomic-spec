@@ -12,10 +12,10 @@ import unittest
 from test_detector import GO_PARSER, MODULES, NODE, P, guard
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-13
+# atomic-spec://ATOMIC-GUARD-001/DR-13
 # Независимый проект выбирает свой реестр и исходники без скрытого пути приложения-донора.
 class PortabilityTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-13
+    # atomic-spec://ATOMIC-GUARD-001/DR-13
     # Проверка рабочего снимка должна разрешать требования в стандартном каталоге нового проекта.
     def test_default_spec_root_in_unrelated_checkout(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -46,7 +46,7 @@ class PortabilityTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             self.assertEqual(json.loads(result.stdout)["spec_root"], "specs")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-5
+    # atomic-spec://ATOMIC-GUARD-001/DR-5
     # Полный контекст не зависит от порядка именованных аргументов на поддерживаемых версиях Python.
     def test_full_mode_after_named_options(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -78,7 +78,7 @@ class PortabilityTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             self.assertEqual(json.loads(result.stdout)["documents"][0]["path"], "specs/demo.spec.md")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Общий diff должен находить изменённый исходник за пределами каталогов прежнего приложения.
     def test_default_diff_scope_catches_unannotated_file(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -112,7 +112,7 @@ class PortabilityTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
             self.assertEqual(json.loads(result.stdout)["input_files"], ["sample.py"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-11
+    # atomic-spec://ATOMIC-GUARD-001/DR-11
     # Исторические локации принадлежат выбранному репозиторию, а не фиксированному проекту-донору.
     def test_revision_links_use_explicit_repository(self):
         revision = "a" * 40
@@ -124,7 +124,7 @@ class PortabilityTests(unittest.TestCase):
         link = guard.location_link(report, {"file": "src/a b.py", "line": 4})
         self.assertIn(f"https://github.com/example/project/blob/{revision}/src/a%20b.py#L4", link)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-11
+    # atomic-spec://ATOMIC-GUARD-001/DR-11
     # Без адреса хранилища отчёт не должен придумывать удалённую ссылку на чужой код.
     def test_revision_without_repository_never_invents_remote(self):
         report = {"revision": "a" * 40, "source_root": "/checkout"}
@@ -133,10 +133,10 @@ class PortabilityTests(unittest.TestCase):
         self.assertIn(report["revision"], link)
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-27
+# atomic-spec://ATOMIC-GUARD-001/DR-27
 # Публичный пример обязан работать вне дерева Guard и обнаруживать повреждение требований.
 class ExampleTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+    # atomic-spec://ATOMIC-GUARD-001/DR-16
     # Каждый публичный режим использует настоящие парсеры и одну политику нового проекта.
     def invoke(self, root, command, *extra):
         return subprocess.run(
@@ -163,7 +163,7 @@ class ExampleTests(unittest.TestCase):
             timeout=30,
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-27
+    # atomic-spec://ATOMIC-GUARD-001/DR-27
     # Установка не требует сервисов донора: четыре языка анализируются в изолированной копии примера.
     def test_documented_commands_and_invalid_reference_round_trip(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -192,7 +192,7 @@ class ExampleTests(unittest.TestCase):
             result = self.invoke(root, "audit", "--directory", "src")
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+    # atomic-spec://ATOMIC-GUARD-001/DR-8
     # Отсутствующий YAML-парсер и повреждённый конфиг должны завершать пример ошибкой, а не частичным PASS.
     def test_missing_dependency_and_invalid_policy_fail_closed(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -205,7 +205,7 @@ class ExampleTests(unittest.TestCase):
             invalid = self.invoke(root, "audit", "--files", "src/fare.py")
             self.assertEqual(invalid.returncode, 2, invalid.stdout + invalid.stderr)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-5
+    # atomic-spec://ATOMIC-GUARD-001/DR-5
     # Зафиксированный Git diff читает исходник, требования и политику из указанной ревизии вопреки новым рабочим байтам.
     def test_real_git_revision_uses_its_own_policy_and_specification(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -235,7 +235,7 @@ class ExampleTests(unittest.TestCase):
             self.assertTrue(any(d["code"] == "SPEC004" for d in report["diagnostics"]))
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-6
+# atomic-spec://ATOMIC-GUARD-001/DR-6
 # Прямой запуск регрессии обязан вернуть ненулевой статус при любом нарушении переносимости.
 if __name__ == "__main__":
     unittest.main()

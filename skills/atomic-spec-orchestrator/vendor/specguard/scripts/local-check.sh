@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+# atomic-spec://ATOMIC-GUARD-001/DR-18
 # Ошибка проверки останавливает вызов до запуска сервисов; скрипт не управляет стендом.
 set -euo pipefail
 sg_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

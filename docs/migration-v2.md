@@ -25,9 +25,9 @@ Preserve old implementation/verification data as historical evidence with its
 actual scope/revision; never assume that it establishes new stack readiness.
 
 The bundled Guard is now the pinned Git distribution. Git check modes use exact
-SHA; an existing Arc project keeps its configured Arc-aware Guard. Python minimum
-for the bundle is 3.11. APM/plugin metadata is version 2.0.1. The standalone Guard
-has an independent version/revision; it is not renamed to methodology 2.0.1.
+SHA; an existing Git project keeps its configured Git-aware Guard. Python minimum
+for the bundle is 3.11. APM/plugin metadata is version 2.0.2. The standalone Guard
+has an independent version/revision; it is not renamed to methodology 2.0.2.
 
 
 [Methodology](methodology.md) · [Gates](gate-validation.md) · [Migration to 2.0](migration-v2.md)

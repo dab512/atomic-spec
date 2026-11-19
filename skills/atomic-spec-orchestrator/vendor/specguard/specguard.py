@@ -39,14 +39,14 @@ EXTENSIONS = {
     ".yml",
 }
 LIMIT = 8 * 1024 * 1024
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+# atomic-spec://ATOMIC-GUARD-001/DR-7
 # Развёрнутые факты одного допустимого исходника могут быть больше текста; их отдельный бюджет остаётся конечным.
 PARSER_OUTPUT_LIMIT = 32 * 1024 * 1024
 RULE = re.compile(r"^(?:#{2,6}\s+|\s*[-*]\s+\*\*)(DR|BR|AC)-(\d+)\b", re.I)
 ANCHOR = re.compile(r'^\s*<a\s+(?:id|name)=["\']([^"\']+)["\']\s*>\s*</a>\s*$')
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+# atomic-spec://ATOMIC-GUARD-001/DR-4
 # Выбор пути не даёт права выйти за корень репозитория или сослаться на подставленный внешний источник.
 def safe_path(path: str) -> str:
     parts = PurePosixPath(path)
@@ -55,9 +55,9 @@ def safe_path(path: str) -> str:
     return parts.as_posix()
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-6
+# atomic-spec://ATOMIC-GUARD-001/DR-6
 # Текст репозитория является данными и не должен получать возможность выполнить команды при проверке.
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+# atomic-spec://ATOMIC-GUARD-001/DR-7
 # Полный вывод сверх бюджета отклоняется явно, а не превращается в усечённый успешный результат.
 def command(args: list[str], cwd: Path, data: str | None = None, *, output_limit: int = LIMIT) -> str:
     result = subprocess.run(args, cwd=cwd, input=data, text=True, capture_output=True, timeout=60)
@@ -68,16 +68,16 @@ def command(args: list[str], cwd: Path, data: str | None = None, *, output_limit
     return result.stdout
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-5
+# atomic-spec://ATOMIC-GUARD-001/DR-5
 # Код, требования и контекст должны относиться к одной выбранной ревизии; смешение снимков делает вывод недостоверным.
 class Repository:
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-5
+    # atomic-spec://ATOMIC-GUARD-001/DR-5
     # Результат чтения из другого репозитория или ревизии не может подтверждать проверяемое состояние.
     def __init__(self, root: Path):
         self.root = root.resolve()
         self.cache: dict[tuple[str | None, str], str] = {}
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+    # atomic-spec://ATOMIC-GUARD-001/DR-4
     # Отсутствие доступного авторитетного файла означает отказ, а не разрешение выдумать или подставить его содержимое.
     def read(self, path: str, revision: str | None = None) -> str:
         path = safe_path(path)
@@ -87,7 +87,7 @@ class Repository:
                 if not re.fullmatch(r"[A-Za-z0-9_./-]+", revision) or revision.startswith("-"):
                     raise ValueError("invalid revision")
                 value = command(["git", "show", f"{revision}:{path}"], self.root)
-                # Arc can return symlink blob text; it cannot be followed across revisions.
+                # Git can return symlink blob text; it cannot be followed across revisions.
             else:
                 file = (self.root / path).resolve()
                 if not file.is_relative_to(self.root):
@@ -99,10 +99,10 @@ class Repository:
         return self.cache[key]
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+# atomic-spec://ATOMIC-GUARD-001/DR-4
 # Только объявленное требование подтверждает ссылку; упоминание ID или учебный пример не создают обязательства спецификации.
 class Specification:
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+    # atomic-spec://ATOMIC-GUARD-001/DR-4
     # Документ с неполными метаданными или неоднозначными пунктами не может быть авторитетным источником покрытия.
     def __init__(self, text: str):
         self.text = text
@@ -174,7 +174,7 @@ class Specification:
             self.rules[key] = "".join(lines[start:stop]).strip()
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-4
+# atomic-spec://ATOMIC-GUARD-001/DR-4
 # Ссылка подтверждает только существующий пункт допустимого источника; закреплённая ревизия не освобождает от проверки его актуальности.
 def reference(value: str, spec_root: str, registry=None) -> tuple[str, str, str | None]:
     value = value.strip()
@@ -192,9 +192,13 @@ def reference(value: str, spec_root: str, registry=None) -> tuple[str, str, str 
             raise ValueError(f"unregistered specification ID {parsed.netloc}")
         return reference(registry[parsed.netloc] + "#" + parsed.path[1:].lower(), spec_root)
     if parsed.scheme or parsed.netloc:
-        if parsed.scheme != "https" or parsed.netloc != "a.yandex-team.ru" or not parsed.path.startswith("/arcadia/"):
-            raise ValueError("only canonical Arcanum specification URLs are supported")
-        path = parsed.path[len("/arcadia/") :]
+        if (
+            parsed.scheme != "https"
+            or parsed.netloc != "code.example.invalid"
+            or not parsed.path.startswith("/repository/")
+        ):
+            raise ValueError("only canonical repository viewer specification URLs are supported")
+        path = parsed.path[len("/repository/") :]
         query = parse_qs(parsed.query, keep_blank_values=True)
         if set(query) != {"rev"} or len(query["rev"]) != 1 or not re.fullmatch(r"[0-9a-f]{40}", query["rev"][0]):
             raise ValueError("pinned link requires exactly one full commit rev")
@@ -211,13 +215,13 @@ def reference(value: str, spec_root: str, registry=None) -> tuple[str, str, str 
     return path, parsed.fragment, revision
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-13
+# atomic-spec://ATOMIC-GUARD-001/DR-13
 # ID требования должен однозначно выбирать документ внутри заданного каталога; порядок записей не может разрешать неоднозначность.
 def registry_for(repo, spec_root, revision):
     key = (revision, spec_root)
     cache = getattr(repo, "_registries", {})
     if key not in cache:
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-13
+        # atomic-spec://ATOMIC-GUARD-001/DR-13
         # Два определения одного ID не дают права молча выбрать последнее: такая ссылка не имеет однозначного источника.
         def pairs(items):
             result = {}
@@ -239,7 +243,7 @@ def registry_for(repo, spec_root, revision):
     return cache[key]
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-13
+# atomic-spec://ATOMIC-GUARD-001/DR-13
 # ID из URI должен совпасть с метаданными документа, а не просто указывать на существующий путь.
 def validate_uri_identity(value, specification):
     parsed = urlparse(value)
@@ -247,7 +251,7 @@ def validate_uri_identity(value, specification):
         raise ValueError(f"registry ID {parsed.netloc} disagrees with document ID {specification.id}")
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+# atomic-spec://ATOMIC-GUARD-001/DR-9
 # Слова-подсказки являются лексическими токенами идентификаторов, а не доказательством важности бизнес-логики.
 HINT_WORDS = frozenset(
     {
@@ -281,17 +285,17 @@ HINT_WORDS = frozenset(
 )
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+# atomic-spec://ATOMIC-GUARD-001/DR-9
 # Случайное совпадение части имени не является сигналом отдельного правила; кандидату требуется самостоятельное слово-подсказка.
 def identifier_hints(name):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Составное имя может содержать сигнал правила, но ruler не означает rule: ложное сходство не должно порождать лишнюю диагностику.
     name = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", name)
     name = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", name)
     return sorted(set(re.findall(r"[a-z]+", name.lower())) & HINT_WORDS)
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+# atomic-spec://ATOMIC-GUARD-001/DR-3
 # URI требует связанного с ним пояснения; произвольный соседний комментарий это условие не выполняет.
 def annotation_lines(lines):
     refs, notes = [], []
@@ -312,7 +316,7 @@ def annotation_lines(lines):
     return refs, "\n".join(notes)
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+# atomic-spec://ATOMIC-GUARD-001/DR-8
 # Покрытие Python должно относиться к реальным объявлениям и решениям, а не к похожему тексту внутри данных программы.
 def python_source(item):
     path, source = item["path"], item["source"]
@@ -327,7 +331,7 @@ def python_source(item):
         units = []
         ast_sizes = {}
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+        # atomic-spec://ATOMIC-GUARD-001/DR-15
         # Синтаксический размер служит воспроизводимой метрикой для политики; он не доказывает смысловую сложность блока.
         def measure(node):
             count = 1 + sum(measure(child) for child in ast.iter_child_nodes(node))
@@ -337,11 +341,11 @@ def python_source(item):
         measure(tree)
         parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+        # atomic-spec://ATOMIC-GUARD-001/DR-17
         # Ослабление для фикстуры допустимо только при подтверждённом происхождении её декоратора в соответствующей области кода.
         scope_bindings = {}
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+        # atomic-spec://ATOMIC-GUARD-001/DR-17
         # Локальное переопределение имени не должно давать постороннему коду льготу, предназначенную для настоящей фикстуры.
         def bindings(scope):
             key = id(scope)
@@ -370,7 +374,7 @@ def python_source(item):
             scope_bindings[key] = (imported, assigned)
             return imported, assigned
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+        # atomic-spec://ATOMIC-GUARD-001/DR-17
         # Одного имени fixture недостаточно для ослабления покрытия: нужна подтверждённая связь с поддерживаемым тестовым API.
         def fixture(node):
             for decorator in node.decorator_list:
@@ -404,7 +408,7 @@ def python_source(item):
                     current = parents.get(current)
             return False
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+        # atomic-spec://ATOMIC-GUARD-001/DR-8
         # Каждое обязательство Python-кода должно сохранять свою локацию и владельца; соседний блок не может ошибочно получить его пояснение.
         def emit(node, name, role="", kind=None, start=None, end=None):
             first = start or min([node.lineno] + [d.lineno for d in getattr(node, "decorator_list", [])])
@@ -437,7 +441,7 @@ def python_source(item):
                 }
             )
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+        # atomic-spec://ATOMIC-GUARD-001/DR-9
         # SQL может содержать важное правило работы с данными, но текст запроса не выполняет обязанность документировать это правило.
         def sql_text(node):
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
@@ -588,7 +592,7 @@ def python_source(item):
         return {"path": path, "units": [], "error": str(error)}
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+# atomic-spec://ATOMIC-GUARD-001/DR-8
 # Отсутствие подходящего парсера не должно превращать выбранный исходник в успешно проверенный файл.
 def parse_sources(args, sources: list[dict]) -> dict[str, dict]:
     result = {item["path"]: python_source(item) for item in sources if item["path"].endswith(".py")}
@@ -617,7 +621,7 @@ def parse_sources(args, sources: list[dict]) -> dict[str, dict]:
     return result
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+# atomic-spec://ATOMIC-GUARD-001/DR-2
 # Учитываем границы удалений, чтобы удаление оператора не исключало проверку сохранившегося владельца.
 def changed_lines(old: str, new: str) -> set[int]:
     changed = set()
@@ -629,7 +633,7 @@ def changed_lines(old: str, new: str) -> set[int]:
     return changed
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+# atomic-spec://ATOMIC-GUARD-001/DR-2
 # В строгом режиме заголовок условия не наследует аннотацию родителя; операторы тела могут её наследовать.
 def select_units(parsed: dict, changed: set[int] | None, audit=False) -> list[dict]:
     units = parsed["units"]
@@ -662,7 +666,7 @@ def select_units(parsed: dict, changed: set[int] | None, audit=False) -> list[di
     return list(selected.values())
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+# atomic-spec://ATOMIC-GUARD-001/DR-8
 # Два самостоятельных узла не становятся одним обязательством только потому, что используют общее пояснение.
 def unit_key(unit):
     return unit.get("id") or (
@@ -674,7 +678,7 @@ def unit_key(unit):
     )
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+# atomic-spec://ATOMIC-GUARD-001/DR-9
 # Группировка не должна скрывать вложенные запросы, сценарии и явные аннотации за общим крупным блоком.
 def tuned_units(path, units, budget=100, roots=None):
     unique = list({unit_key(u): u for u in units}.values())
@@ -735,7 +739,7 @@ def tuned_units(path, units, budget=100, roots=None):
     return list(chosen.values())
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+# atomic-spec://ATOMIC-GUARD-001/DR-9
 # Объединение синтаксиса сокращает шум, но не подтверждает, что вложенные решения реализуют одно бизнес-правило.
 def grouped_units(path, units):
     by_range = {}
@@ -761,7 +765,7 @@ def grouped_units(path, units):
     return roots
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+# atomic-spec://ATOMIC-GUARD-001/DR-2
 # Последовательные и вложенные ветви образуют кандидатов для ревью, но не выдуманные бизнес-правила.
 def branch_clusters(source, units, budget=80):
     kinds = {
@@ -823,7 +827,7 @@ def branch_clusters(source, units, budget=80):
     return clusters
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+# atomic-spec://ATOMIC-GUARD-001/DR-10
 # Уровень следует закрытому синтаксическому контракту, а не важности имени или уверенности модели.
 def annotation_severity(unit):
     advisory_roles = {
@@ -873,13 +877,13 @@ def annotation_severity(unit):
     return "error" if unit["kind"] in structural or unit.get("role") in {"decision", "scenario"} else "warning"
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+# atomic-spec://ATOMIC-GUARD-001/DR-10
 # Блокируют только определённые ошибки; рекомендательные кандидаты остаются видимыми и учитываются отдельно.
 def diagnostic_summary(diagnostics):
     return {level: sum(d["severity"] == level for d in diagnostics) for level in ("error", "warning")}
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+# atomic-spec://ATOMIC-GUARD-001/DR-26
 # Смысловое ревью должно видеть физические пояснения, а не повторные представления их владельцев.
 def comment_entries(path, source, parsed, changed):
     entries, seen = [], set()
@@ -918,7 +922,7 @@ def comment_entries(path, source, parsed, changed):
     return sorted(entries, key=lambda item: (item["line"], item["column"]))
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-5
+# atomic-spec://ATOMIC-GUARD-001/DR-5
 # Контекст должен сохранять все места применения требования; устранение повторов самого требования не разрешает терять локации.
 def analyze(
     args,
@@ -1024,7 +1028,7 @@ def analyze(
                 }
         if args.command == "comments":
             comments.extend(comment_entries(path, source, data, changed))
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-10
+        # atomic-spec://ATOMIC-GUARD-001/DR-10
         # Размер остаётся подсказкой для ревью даже у полностью размеченного блока, а не новым обязательством.
         if args.command in {"audit", "check"}:
             for group in groups:
@@ -1148,7 +1152,7 @@ def analyze(
     }
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+# atomic-spec://ATOMIC-GUARD-001/DR-2
 # Удаление блока целиком не создаёт обязанность у соседа; удаление аннотации сохраняет обязанность её владельца.
 def configured_changes(old, new, previous, current):
     operations = difflib.SequenceMatcher(None, old.splitlines(), new.splitlines(), autojunk=False).get_opcodes()
@@ -1200,7 +1204,7 @@ def configured_changes(old, new, previous, current):
     return changed
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+# atomic-spec://ATOMIC-GUARD-001/DR-19
 # Выбор YAML или JSON не меняет обязательства политики; происхождение результата должно отражать именно исходную конфигурацию.
 def policy_document(args, path, text):
     if len(text.encode()) > 256 * 1024:
@@ -1212,7 +1216,7 @@ def policy_document(args, path, text):
     return command([args.node, str(base / "policy.cjs"), modules], base, text)
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+# atomic-spec://ATOMIC-GUARD-001/DR-1
 # Исключённый путь не требует чтения исходника: его байты не должны влиять на допуск или результат кеша.
 def source_exclusion(path, policy):
     exclusion = policy.exclude_file(path)
@@ -1227,7 +1231,7 @@ def source_exclusion(path, policy):
     return None
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+# atomic-spec://ATOMIC-GUARD-001/DR-16
 # Одна выбранная политика определяет обязательства всех команд; ослабление кандидата не разрешает принимать невалидную явную ссылку.
 def analyze_configured(args, repo, files, revision, base_revision):
     # Optional configured mode: legacy standalone callers do not load policy code.
@@ -1327,7 +1331,7 @@ def analyze_configured(args, repo, files, revision, base_revision):
                 )
             )
             continue
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-23
+        # atomic-spec://ATOMIC-GUARD-001/DR-23
         # Файловая уникальность пояснений проверяется отдельно от валидности ссылок и обязательств покрытия.
         diagnostics.extend(duplicate_diagnostics(policy, data, path))
         facts = Facts(path, data)
@@ -1388,7 +1392,7 @@ def analyze_configured(args, repo, files, revision, base_revision):
                         if specs[pin_key].rules.get(identifier) != spec.rules[identifier]:
                             raise ValueError(f"pinned requirement {identifier} differs from reviewed revision")
                     target = (spec_path, identifier)
-                    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+                    # atomic-spec://ATOMIC-GUARD-001/DR-22
                     # Язык пояснения не определяет валидность ссылки: рекомендательное нарушение не ломает её покрытие.
                     if policy.annotation_language and unit.get("description", "").strip():
                         result = assess(
@@ -1496,7 +1500,7 @@ def analyze_configured(args, repo, files, revision, base_revision):
     )
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+# atomic-spec://ATOMIC-GUARD-001/DR-21
 # Явный выбор каталога ограничен бюджетами; зависимости, кеши и symlink не обходятся.
 DIRECTORY_MAX_FILES = 1000
 DIRECTORY_MAX_ENTRIES = 20000
@@ -1505,7 +1509,7 @@ DIRECTORY_SKIP = {
     "node_modules",
     "vendor",
     ".git",
-    ".arc",
+    ".vcs",
     ".svn",
     ".venv",
     "venv",
@@ -1518,7 +1522,7 @@ DIRECTORY_SKIP = {
 }
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+# atomic-spec://ATOMIC-GUARD-001/DR-21
 # Пользователь должен знать все пропуски выбранного поддерева; превышение бюджета не даёт права выдать усечённый результат за полный.
 def directory_files(repo, value):
     relative = safe_path(value)
@@ -1574,7 +1578,7 @@ def directory_files(repo, value):
     return sorted(files), sorted(excluded, key=lambda item: item["file"])
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+# atomic-spec://ATOMIC-GUARD-001/DR-18
 # Все сохранённые Git-изменения читаются без строкового угадывания путей и без запуска проверяемого кода.
 def git_status(root, scope):
     raw = command(
@@ -1593,7 +1597,7 @@ def git_status(root, scope):
     return {"status": groups}
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-5
+# atomic-spec://ATOMIC-GUARD-001/DR-5
 # Контекст PR обязан соответствовать авторитетным base/merge; локальное состояние не может подменять проверяемую ревизию.
 def resolve_inputs(args, repo):
     revision, base_revision = args.revision, args.base
@@ -1615,7 +1619,7 @@ def resolve_inputs(args, repo):
         if args.files or revision or base_revision:
             raise ValueError("--pr is exclusive with --files/--base/--revision")
         raise ValueError("Use explicit Git --base/--revision; --pr is not supported by the Git adapter")
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+    # atomic-spec://ATOMIC-GUARD-001/DR-1
     # Одна область анализа не меняется от записи пути: алиасы не должны терять ошибки исходника или обходить выбор diff.
     files = list(dict.fromkeys(safe_path(path) for path in (args.files or [])))
     args.added_files = set()
@@ -1654,7 +1658,7 @@ def resolve_inputs(args, repo):
             changes.append(path)
             if status == "A":
                 args.added_files.add(path)
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+        # atomic-spec://ATOMIC-GUARD-001/DR-18
         # Локальный допуск относится к сохранённой рабочей правке, включая новые файлы; прежний коммит не подтверждает её корректность.
         if working_tree:
             status = git_status(repo.root, args.scope)
@@ -1681,7 +1685,7 @@ def resolve_inputs(args, repo):
     return files, revision, base_revision
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-11
+# atomic-spec://ATOMIC-GUARD-001/DR-11
 # Локации ведут в точный неизменяемый снимок либо локальный файл, а не в угаданный HEAD.
 def location_link(report, location):
     path, line = location["file"], location["line"]
@@ -1697,7 +1701,7 @@ def location_link(report, location):
     return f"[{label}]({target})"
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-11
+# atomic-spec://ATOMIC-GUARD-001/DR-11
 # Компактность отчёта не оправдывает потерю нарушений: общая подсказка обязана сохранять каждую точную локацию.
 def diagnostic_groups(report):
     actions = {
@@ -1762,7 +1766,7 @@ def diagnostic_groups(report):
     return lines
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-12
+# atomic-spec://ATOMIC-GUARD-001/DR-12
 # Поиск мест использования проверяет существование требования даже при нуле совпадений. Явная выборка не выдаётся за весь репозиторий.
 def whereused(report, value, repo, revision):
     target, separator, identifier = value.partition("#")
@@ -1806,10 +1810,10 @@ def whereused(report, value, repo, revision):
     return report
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+# atomic-spec://ATOMIC-GUARD-001/DR-26
 # Текст репозитория остаётся данными для ревью, даже если содержит Markdown или инструкции агенту.
 def comment_markdown(report, mode):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+    # atomic-spec://ATOMIC-GUARD-001/DR-26
     # Содержимое пояснения не должно менять границы данных и превращаться в разметку инструкций агенту.
     def fenced(text):
         fence = "`" * max(3, 1 + max((len(run) for run in re.findall(r"`+", text)), default=0))
@@ -1853,8 +1857,8 @@ def comment_markdown(report, mode):
     return "\n".join(lines) + "\n"
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-11
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-12
+# atomic-spec://ATOMIC-GUARD-001/DR-11
+# atomic-spec://ATOMIC-GUARD-001/DR-12
 # Компактный отчёт и контекст агента используют одинаковые ссылки и уровни, не теряя локации.
 def markdown(report, mode):
     if report.get("command") == "comments":
@@ -1899,7 +1903,7 @@ def markdown(report, mode):
     return "\n".join(lines) + "\n"
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-6
+# atomic-spec://ATOMIC-GUARD-001/DR-6
 # Публичный интерфейс ограничивает вывод и задаёт явные коды завершения без усечения.
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="atomic-spec-guard", description=__doc__)
@@ -2052,7 +2056,7 @@ def main(argv=None):
         return 2
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-6
+# atomic-spec://ATOMIC-GUARD-001/DR-6
 # Неполная проверка не должна выглядеть успешной для вызывающей системы и разрешать зависящие от неё действия.
 if __name__ == "__main__":
     sys.exit(main())

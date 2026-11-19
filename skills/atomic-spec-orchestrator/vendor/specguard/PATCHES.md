@@ -1,33 +1,9 @@
-# Происхождение и выделение инструмента
+# Distribution adaptation
 
-Первоначальная реализация разрабатывалась в SkillStore. Рабочая копия TOne
-перевела VCS-границу на Git и сохранила входной снимок в UPSTREAM.json.
-SHA-256 исходных файлов — свидетельство входа импорта; номер исходной ревизии
-не аттестован. Исторические отчёты пилотов и данные приложений не включены.
+The checker is derived from the pinned upstream Git snapshot in ORIGIN.json.
+This distribution uses neutral requirement IDs, example paths and fixture names.
+The enclosing guard-source.json records the adapted source bytes and file set.
 
-В независимый репозиторий перенесены:
-
-- CLI audit/check/getcontext/whereused/comments, строгая политика и AST-парсеры;
-- Git diff, NUL status для staged/unstaged/untracked, чтение точных ревизий;
-- YAML-политики, проверка языка/уникальности пояснений, кеш и локальный gate;
-- собственная спецификация, manifest и накопленные регрессионные тесты;
-- исправление владельца JS TestScenario при совпадении диапазонов AST-фактов.
-
-При выделении удалены пути/значения TOne и зависимость от Arcadia/ya:
-
-- default spec-root — specs, diff scope — весь выбранный checkout;
-- self-check использует manifest относительно каталога Guard и работает вне Git;
-- root-relative тестовые селекторы сохранены после перемещения manifest;
-- npm-парсеры берутся только из установки Guard либо явного --node-modules;
-- ссылки на закреплённый код используют явный --repository-url;
-- --pr отклоняется; GitHub Actions передаёт точные base/head SHA;
-- добавлены независимый пример, инструкции установки/CI и тесты переносимости.
-
-Исторические ID SKSTORE-ATOMIC-GUARD-001 сохранены, чтобы не ломать связи
-накопленных требований и тестов. SkillStore-specific профиль и preflight
-в tests/fixtures — только регрессионные данные; они не являются политикой
-пользовательского проекта. Адреса импортов в fixtures не вызываются по сети.
-Сам анализ не требует доступа к внутренней инфраструктуре.
-
-Поддержка Python 3.11: intermixed-разбор CLI сохраняет режим full/brief после
-именованных опций; отдельный RED→GREEN тест и полный набор на Python 3.11/3.13.
+The AST adapters, policy engine, cache and Git workflow retain their behavioral
+regressions. Runtime analysis remains local, deterministic and does not execute
+analyzed source. Examples of pinned viewer URLs use a reserved demonstration host.

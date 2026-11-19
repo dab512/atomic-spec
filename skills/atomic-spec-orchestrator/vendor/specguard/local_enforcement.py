@@ -3,7 +3,7 @@
 import re
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-25
+# atomic-spec://ATOMIC-GUARD-001/DR-25
 # Настройка должна однозначно называть базовую ветку; произвольный текст не определяет область проверки.
 def validate(settings):
     if not isinstance(settings, dict) or set(settings) != {"base_ref"}:
@@ -14,7 +14,7 @@ def validate(settings):
     return value
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-25
+# atomic-spec://ATOMIC-GUARD-001/DR-25
 # Проверке подлежат изменения своей ветки от общей базы с trunk; неизвестная база не даёт права пропустить проверку.
 def baseline(args, repo, settings, run):
     base_ref = validate(settings)

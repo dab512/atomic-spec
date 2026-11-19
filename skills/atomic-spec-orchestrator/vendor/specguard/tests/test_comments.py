@@ -14,13 +14,13 @@ import test_reverse_and_links as reverse
 URI = reverse.URI
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+# atomic-spec://ATOMIC-GUARD-001/DR-26
 # Ревью должно видеть каждую физическую разметку, включая ошибочную, без строковых имитаций.
 class CommentsTests(unittest.TestCase):
     fixture = reverse.ReverseTests.fixture
     invoke = reverse.ReverseTests.invoke
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+    # atomic-spec://ATOMIC-GUARD-001/DR-26
     # Несколько владельцев не размножают один комментарий, а файловое пояснение не теряется.
     def test_comments_all_adapters_and_file_group(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -44,7 +44,7 @@ class CommentsTests(unittest.TestCase):
             self.assertEqual(report["comments"][1]["refs"], [URI])
             self.assertIn("Business invariant.", report["comments"][1]["source"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+    # atomic-spec://ATOMIC-GUARD-001/DR-26
     # Ошибочная разметка остаётся доступной для исправления и не превращается в успешную выгрузку.
     def test_invalid_and_empty_explanations_are_retained(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -52,7 +52,7 @@ class CommentsTests(unittest.TestCase):
             self.fixture(root)
             (root / "a.py").write_text(
                 f"# {URI}\ndef first():\n    pass\n\n"
-                "# atomic-spec://SKSTORE-TRACE-001/DR-999\n# Unknown rule.\ndef second():\n    pass\n"
+                "# atomic-spec://DEMO-TRACE-001/DR-999\n# Unknown rule.\ndef second():\n    pass\n"
             )
             code, report = self.invoke(root, "comments", files=["a.py"])
             self.assertEqual(code, 1)
@@ -60,7 +60,7 @@ class CommentsTests(unittest.TestCase):
             self.assertEqual(report["comments"][0]["description"], "")
             self.assertTrue(any(d["code"] == "SPEC004" for d in report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+    # atomic-spec://ATOMIC-GUARD-001/DR-26
     # Пакет для агента сохраняет текст пояснения и требования вместе с точной локацией.
     def test_directory_and_markdown(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -80,13 +80,13 @@ class CommentsTests(unittest.TestCase):
             self.assertIn("Actual rule.", text)
             self.assertIn("src/nested/a.py:1", text)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+    # atomic-spec://ATOMIC-GUARD-001/DR-26
     # Невалидное файловое пояснение нельзя скрыть отсутствием владельца или исполнением только успешных блоков.
     def test_file_group_failure_and_partial_parse(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             self.fixture(root)
-            (root / "a.py").write_text("# atomic-spec://SKSTORE-TRACE-001/DR-999\n# Unknown obligation.\n\nvalue = 1\n")
+            (root / "a.py").write_text("# atomic-spec://DEMO-TRACE-001/DR-999\n# Unknown obligation.\n\nvalue = 1\n")
             (root / "broken.py").write_text("def broken(:\n")
             code, report = self.invoke(root, "comments", files=["a.py", "broken.py"])
             self.assertEqual(code, 1)
@@ -94,7 +94,7 @@ class CommentsTests(unittest.TestCase):
             self.assertEqual(len(report["comments"]), 1)
             self.assertEqual({d["code"] for d in report["diagnostics"]}, {"SPEC004", "SPEC008"})
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+    # atomic-spec://ATOMIC-GUARD-001/DR-26
     # Ревизионная выгрузка ограничена изменённым правилом, а full сохраняет целый авторитетный документ.
     def test_diff_and_full_document(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -119,7 +119,7 @@ class CommentsTests(unittest.TestCase):
             self.assertEqual([c["description"] for c in report["comments"]], ["First invariant."])
             self.assertIn("Other rule.", report["documents"][0]["text"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-26
+    # atomic-spec://ATOMIC-GUARD-001/DR-26
     # Конфиг не должен исключать ошибочные пояснения из пакета ревью; файл с явным исключением отмечается отдельно.
     def test_configured_export_and_exclusions(self):
         with tempfile.TemporaryDirectory() as folder:

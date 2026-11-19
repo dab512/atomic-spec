@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+// atomic-spec://ATOMIC-GUARD-001/DR-15
 // Обязательства для известных гейтов доступа нельзя переносить на одноимённый локальный код: ложное совпадение не доказывает правило доступа.
 func policyFacts(file *ast.File, fs *token.FileSet, out *Result, sizes map[ast.Node]int) {
 	imports := map[string]string{}

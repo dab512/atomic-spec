@@ -18,7 +18,7 @@ guard = importlib.util.module_from_spec(module_spec)
 module_spec.loader.exec_module(guard)
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+# atomic-spec://ATOMIC-GUARD-001/DR-7
 # Достоверность сравнения ограничена явно выбранным неизменным корпусом; соседние файлы не могут незаметно менять эталон.
 def snapshot(root, files):
     items = []
@@ -38,7 +38,7 @@ def snapshot(root, files):
     return items
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+# atomic-spec://ATOMIC-GUARD-001/DR-7
 # Независимая выборка должна оставаться неизменной и не пересекаться с первой; её результаты не подтверждают выводы о случаях из другого корпуса.
 def fresh_summary(args, manifest, reports):
     old = {item["file"] for item in json.loads((HERE / "source-manifest.json").read_text())}
@@ -88,7 +88,7 @@ def fresh_summary(args, manifest, reports):
     print(json.dumps(summary, ensure_ascii=False))
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+# atomic-spec://ATOMIC-GUARD-001/DR-7
 # Сравнение настроек достоверно только на неизменившемся корпусе; изменённые исходники нельзя оценивать по прежнему эталону.
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -124,7 +124,7 @@ def main():
     if args.config:
         return configured_pilot(args, manifest, files)
     reports = {}
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Сокращение числа кандидатов не доказывает улучшения точности: сравнение профилей должно сохранять различие между сигналом и бизнес-правилом.
     for profile in ("strict", "grouped", "tuned"):
         output = args.output_dir / f"audit-{profile}.json"
@@ -176,19 +176,19 @@ def main():
             }
         )
     # Replay the previously green permission mutation against the real engine in memory.
-    proof_file = "marvel/skillstore/services/skillstore/internal/access/actions/actions.go"
+    proof_file = "example/sample/services/sample/internal/access/actions/actions.go"
     old = (args.root / proof_file).read_text()
     needle = "HandoverAllPresets:    {idm.RoleAdmin},"
     if old.count(needle) != 1:
         raise ValueError("permission replay fixture changed")
     new = old.replace(needle, "HandoverAllPresets:    {idm.RoleAdmin, idm.RoleUser},")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+    # atomic-spec://ATOMIC-GUARD-001/DR-7
     # Проверка чувствительности к изменению прав не должна менять замороженные исходники и тем самым разрушать сравнимость прогонов.
     class ReplayRepository:
         root = args.root
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+        # atomic-spec://ATOMIC-GUARD-001/DR-2
         # Базовое и изменённое состояния должны оставаться различимыми: иначе опыт не доказывает обнаружение нового нарушения.
         def read(self, path, revision=None):
             if path == proof_file:
@@ -234,7 +234,7 @@ def main():
     ]
     for file in files:
         lines.append(
-            f"| `{file.removeprefix('marvel/skillstore/')}` | {before[file]} | {after['strict'][file]} | {after['grouped'][file]} | {after['tuned'][file]} |"
+            f"| `{file.removeprefix('example/sample/')}` | {before[file]} | {after['strict'][file]} | {after['grouped'][file]} | {after['tuned'][file]} |"
         )
     lines += [
         "",
@@ -289,7 +289,7 @@ def main():
     return 0
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+# atomic-spec://ATOMIC-GUARD-001/DR-16
 # Пилот должен проверять публичный контракт настроенной политики; успешная изолированная демонстрация не заменяет её результат.
 def configured_pilot(args, manifest, files):
     output = args.output_dir / "audit-configured.json"
@@ -331,17 +331,17 @@ def configured_pilot(args, manifest, files):
         policy=report["policy"],
     )
     # This is the same real mutation used by tune-v2, applied only to an in-memory revision.
-    target = "marvel/skillstore/services/skillstore/internal/access/actions/actions.go"
+    target = "example/sample/services/sample/internal/access/actions/actions.go"
     old = (args.root / target).read_text()
     needle = "HandoverAllPresets:    {idm.RoleAdmin},"
     if old.count(needle) != 1:
         raise ValueError("permission mutation fixture changed")
     new = old.replace(needle, "HandoverAllPresets:    {idm.RoleAdmin, idm.RoleUser},")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+    # atomic-spec://ATOMIC-GUARD-001/DR-17
     # Ослабления вспомогательного кода не должны разрешать незадокументированное изменение матрицы прав.
     class ReplayRepository(guard.Repository):
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+        # atomic-spec://ATOMIC-GUARD-001/DR-2
         # Сравнение должно использовать заявленные базовые и изменённые байты; подмена их одним состоянием скрыла бы регрессию доступа.
         def read(self, path, revision=None):
             if path == target:
@@ -444,7 +444,7 @@ def configured_pilot(args, manifest, files):
     return 0
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+# atomic-spec://ATOMIC-GUARD-001/DR-17
 # Настройка шума недопустима, если вместе с лишними ошибками исчезают ранее подтверждённые обязательства покрытия.
 def replay_review(root, report, manifest):
     sample = json.loads(manifest.read_text())
@@ -479,7 +479,7 @@ def replay_review(root, report, manifest):
     )
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-6
+# atomic-spec://ATOMIC-GUARD-001/DR-6
 # Неуспешный или неполный пилот не должен сообщать вызывающему процессу об успешной проверке.
 if __name__ == "__main__":
     sys.exit(main())

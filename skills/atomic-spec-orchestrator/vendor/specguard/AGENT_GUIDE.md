@@ -15,7 +15,7 @@
 ## Основной формат
 
 ```go
-//atomic-spec://SKSTORE-PUBLICATION-001/DR-5
+//atomic-spec://DEMO-PUBLICATION-001/DR-5
 // Резервируем место до создания PR, чтобы конкурентные публикации соблюдали общий лимит.
 // Освобождаем его только после подтверждённого закрытия PR.
 func reservePublication() {}
@@ -24,14 +24,14 @@ func reservePublication() {}
 Короткая форма:
 
 ```go
-// atomic-spec://SKSTORE-PUBLICATION-001/DR-5 // Резервируем место до создания PR.
+// atomic-spec://DEMO-PUBLICATION-001/DR-5 // Резервируем место до создания PR.
 func reservePublication() {}
 ```
 
 В Python и YAML используй `#` вместо `//`:
 
 ```python
-# atomic-spec://SKSTORE-PUBLICATION-001/DR-9
+# atomic-spec://DEMO-PUBLICATION-001/DR-9
 # Сверяем существующий PR, чтобы не создавать дубликаты при потере ответа.
 if outcome_unknown:
     reconcile_existing_pr()
@@ -64,8 +64,8 @@ Spec-комментарий описывает **правило предметн
 ```sh
 python3 specguard.py check --base BASE_SHA --revision MERGE_SHA
 python3 specguard.py getcontext brief --files FILE1.go FILE2.ts
-python3 specguard.py whereused --spec atomic-spec://SKSTORE-PUBLICATION-001/DR-5 --files FILE1.go FILE2.ts
-python3 specguard.py whereused --spec atomic-spec://SKSTORE-PUBLICATION-001 --files FILE1.go FILE2.ts
+python3 specguard.py whereused --spec atomic-spec://DEMO-PUBLICATION-001/DR-5 --files FILE1.go FILE2.ts
+python3 specguard.py whereused --spec atomic-spec://DEMO-PUBLICATION-001 --files FILE1.go FILE2.ts
 ```
 
 `whereused --base BASE_SHA --revision HEAD_SHA` возвращает места **из указанного diff**, а не из всего проекта. `--pr` в Git-адаптере отклоняется. Для инвентаризации проекта передай полный явный список его файлов. Отчёт всегда сохраняет область и ревизию; при ошибке парсера/ссылки полнота не подтверждается. CI самого Guard включён; CI приложения подключается отдельно. Каталог выбирается явно и ограниченно через --directory.

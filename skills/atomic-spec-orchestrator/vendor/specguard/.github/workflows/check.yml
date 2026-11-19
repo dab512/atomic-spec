@@ -1,4 +1,4 @@
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+# atomic-spec://ATOMIC-GUARD-001/DR-16
 # Удалённый допуск требует тех же реальных парсеров, регрессий и собственной проверки, что и локальная разработка.
 name: check
 on:

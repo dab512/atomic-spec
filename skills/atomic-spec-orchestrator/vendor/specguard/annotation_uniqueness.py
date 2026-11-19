@@ -3,13 +3,13 @@
 import unicodedata
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-23
+# atomic-spec://ATOMIC-GUARD-001/DR-23
 # Каноническая форма Unicode, регистр и лишние пробелы не превращают скопированное пояснение в новое.
 def normalized(text):
     return " ".join(unicodedata.normalize("NFC", text).casefold().split())
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-23
+# atomic-spec://ATOMIC-GUARD-001/DR-23
 # Разные группы одного файла обязаны иметь разные пояснения; повторное представление одной группы не является нарушением уникальности.
 def duplicate_diagnostics(policy, parsed, path):
     if policy.annotation_uniqueness is None:

@@ -1,9 +1,9 @@
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+// atomic-spec://ATOMIC-GUARD-001/DR-19
 // Политика YAML является ограниченными данными, а не способом исполнения кода или неоднозначного изменения правил проверки.
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+// atomic-spec://ATOMIC-GUARD-001/DR-19
 // Неоднозначная либо чрезмерно большая политика не может стать рабочей конфигурацией; её загрузка должна завершиться явным отказом.
 function main() {
 try {
@@ -14,7 +14,7 @@ try {
     if (doc.errors.length || doc.warnings.length) throw new Error((doc.errors[0] || doc.warnings[0]).message);
     if (doc.directives.yaml.version !== '1.2') throw new Error('policy requires YAML 1.2');
     yaml.visit(doc, {
-        // atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+        // atomic-spec://ATOMIC-GUARD-001/DR-19
         // Неявные преобразования, ссылки и небезопасные значения YAML не должны менять смысл заявленной политики.
         Node(key, node, context) {
             if (context.length > 64) throw new Error('policy nesting exceeds 64');

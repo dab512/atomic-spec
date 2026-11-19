@@ -1,101 +1,101 @@
 [
   {
-    "file": "marvel/skillstore/services/skillstore/cmd/app/main.go",
+    "file": "example/sample/services/sample/cmd/app/main.go",
     "sha256": "8f40c54afc77d17318b249de5415a2f932c83ece07f9558e76436981a45b8b9d",
     "bytes": 282
   },
   {
-    "file": "marvel/skillstore/services/skillstore/internal/access/abc/client.go",
+    "file": "example/sample/services/sample/internal/access/abc/client.go",
     "sha256": "1d634746653afe43f445181505205a8dfa37c531e17805a905f55e5aad2f9ba8",
     "bytes": 51859
   },
   {
-    "file": "marvel/skillstore/services/skillstore/internal/access/abc/client_test.go",
+    "file": "example/sample/services/sample/internal/access/abc/client_test.go",
     "sha256": "0d785e7d71a306a884b833832e29cc06a5fe2c48dcdf1861f96b564c7896f03c",
     "bytes": 151603
   },
   {
-    "file": "marvel/skillstore/services/skillstore/testsuite/tests/test_publication_queue.py",
+    "file": "example/sample/services/sample/testsuite/tests/test_publication_queue.py",
     "sha256": "77ddd26166f55351db18495340dbaa63d4008c54ac1d15acad76e95cd5e5e6df",
     "bytes": 26948
   },
   {
-    "file": "marvel/skillstore/services/skillstore/internal/access/abc/source_ownership.go",
+    "file": "example/sample/services/sample/internal/access/abc/source_ownership.go",
     "sha256": "cc6e83ae6794fc9c061afeddbf736129f5ed14faf6ab4c50b646b6a6ef61141f",
     "bytes": 23882
   },
   {
-    "file": "marvel/skillstore/services/skillstore/internal/access/actions/actions.go",
+    "file": "example/sample/services/sample/internal/access/actions/actions.go",
     "sha256": "2299df0a631a0c4b44e86d9101e05a5783b665f5ff3f8d0e85ad022a9061aabd",
     "bytes": 13123
   },
   {
-    "file": "marvel/skillstore/services/skillstore/internal/access/actions/actions_test.go",
+    "file": "example/sample/services/sample/internal/access/actions/actions_test.go",
     "sha256": "f05099fb25c890afed60a8edb356bea2f872957b42fa72c8c8566650c3439a10",
     "bytes": 7983
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/ci.config.ts",
+    "file": "example/sample/services/sample-frontend/ci.config.ts",
     "sha256": "0c4ca365438cee94e761d232c42d4374db051d435783751c525dca54b9e7f7f2",
     "bytes": 1164
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/dev/prod-api.ts",
+    "file": "example/sample/services/sample-frontend/dev/prod-api.ts",
     "sha256": "ef4769df6c11d9e26d8be59224da9aa5aa4b49ba4a510143541d05161f5e1c4c",
     "bytes": 2502
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/src/api/agents.ts",
+    "file": "example/sample/services/sample-frontend/src/api/agents.ts",
     "sha256": "3c7aebe26a6885db6e705f7afa04f60b1df8e96d52189a7c230510c1df9cc3e8",
     "bytes": 801
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/src/api/agents.test.ts",
+    "file": "example/sample/services/sample-frontend/src/api/agents.test.ts",
     "sha256": "1f22e1a07ffaa3ec94e399f516d8f24c024a2b83b3ce08d07fc630822572f67a",
     "bytes": 3658
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/src/generated/capabilities.ts",
+    "file": "example/sample/services/sample-frontend/src/generated/capabilities.ts",
     "sha256": "22eb0d5475593296fb29bb62cba13ebe37433b791f3e7e8b4288fb03947376cf",
     "bytes": 2163
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/src/app.tsx",
+    "file": "example/sample/services/sample-frontend/src/app.tsx",
     "sha256": "a3041ca1c98c9990d8a17e555911e6fefcdaa2a572928326e4f36b36c61d6e65",
     "bytes": 2058
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/src/components/api-error-alert.tsx",
+    "file": "example/sample/services/sample-frontend/src/components/api-error-alert.tsx",
     "sha256": "54b9a5b753c5d3a803cb85cb961701d70dcea1ef1acfc1b5082ce0ef5040bb3c",
     "bytes": 6881
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/src/components/layout.tsx",
+    "file": "example/sample/services/sample-frontend/src/components/layout.tsx",
     "sha256": "0ac1f12462115d58085c038ff3acc35878f17767aeb1f330a87d3af3f4c79103",
     "bytes": 39962
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/.eslintrc.cjs",
+    "file": "example/sample/services/sample-frontend/.eslintrc.cjs",
     "sha256": "3287e4610f921b9b40e8aa2e6c6e45c49af6146ecc4d3733a5e2ab08cbe7be52",
     "bytes": 487
   },
   {
-    "file": "marvel/skillstore/a.yaml",
+    "file": "example/sample/a.yaml",
     "sha256": "b8926dd313516e5b22a181014731aae614d149f816c33efe6aa827634e01eeb5",
     "bytes": 600
   },
   {
-    "file": "marvel/skillstore/services/skillstore/config/config.yaml",
+    "file": "example/sample/services/sample/config/config.yaml",
     "sha256": "943f1ae0bfbf89502c84e89a0a311b9c37bd3d8ca1c506baef2ee87ce5a352c6",
     "bytes": 25079
   },
   {
-    "file": "marvel/skillstore/services/skillstore-frontend/package.json",
+    "file": "example/sample/services/sample-frontend/package.json",
     "sha256": "dddad402d3c2df6230c5c067f634bd3a575a4039dbb1ad5eb92c572a4f97db9b",
     "bytes": 1898
   },
   {
-    "file": "marvel/skillstore/services/atomic/README.md",
+    "file": "example/sample/services/atomic/README.md",
     "sha256": "66dd5b6646f5d8f5c16a2867d67ddfa595726fb4f8784eec806bd84460416502",
     "bytes": 4656
   }

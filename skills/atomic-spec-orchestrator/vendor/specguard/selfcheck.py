@@ -10,7 +10,7 @@ import sys
 import specguard
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-20
+# atomic-spec://ATOMIC-GUARD-001/DR-20
 # Самопроверка обязана проверять заявленный набор исходников по собственной спеке; вызывающий код не может незаметно сузить эти обязательства.
 def main(argv=None):
     parser = argparse.ArgumentParser(add_help=False)
@@ -67,7 +67,7 @@ def main(argv=None):
         return 2
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-6
+# atomic-spec://ATOMIC-GUARD-001/DR-6
 # Вызывающая обёртка должна получить действительный результат проверки, чтобы неполный анализ не разрешил дальнейшую операцию.
 if __name__ == "__main__":
     raise SystemExit(main())

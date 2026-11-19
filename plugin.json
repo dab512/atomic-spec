@@ -1,6 +1,6 @@
 {
   "name": "atomic-spec",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Atomic Spec methodology and orchestrator skill for AI-driven specification, implementation, and testing workflows.",
   "author": {
     "name": "dab512"

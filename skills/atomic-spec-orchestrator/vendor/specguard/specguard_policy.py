@@ -10,7 +10,7 @@ import re
 
 from local_enforcement import validate as validate_local_enforcement
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+# atomic-spec://ATOMIC-GUARD-001/DR-14
 # Закрытая схема отвергает опечатки и неподдерживаемую семантику до анализа исходников.
 LEVELS = {"error", "warning", "notice"}
 NODES = {
@@ -97,14 +97,14 @@ DECISIONS = {
 }
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+# atomic-spec://ATOMIC-GUARD-001/DR-14
 # Опечатка или пропуск обязательного поля не может молча менять действующую политику проверки.
 def keys(value, allowed, required=()):
     if not isinstance(value, dict) or set(value) - set(allowed) or set(required) - set(value):
         raise ValueError(f"invalid configuration fields; expected {sorted(allowed)}, required {sorted(required)}")
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+# atomic-spec://ATOMIC-GUARD-001/DR-14
 # Связи между настройками должны быть заданы явно; пустое или выведенное из кода имя не определяет правило политики.
 def strings(value):
     if not isinstance(value, list) or not all(isinstance(v, str) and v for v in value):
@@ -112,14 +112,14 @@ def strings(value):
     return value
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+# atomic-spec://ATOMIC-GUARD-001/DR-14
 # Идентификатор настройки не должен позволять подменить структуру шаблона или смысл ссылки между правилами.
 def identity(value):
     if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,79}", value):
         raise ValueError(f"invalid configuration identifier: {value!r}")
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+# atomic-spec://ATOMIC-GUARD-001/DR-14
 # Пользовательский шаблон поиска не должен превращать быструю проверку в неограниченное вычисление.
 @lru_cache(maxsize=512)
 def pattern(value):
@@ -138,7 +138,7 @@ def pattern(value):
         raise ValueError(f"invalid regex: {error}") from error
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+# atomic-spec://ATOMIC-GUARD-001/DR-14
 # Политика может требовать только поддерживаемые предикаты и измерения; неизвестное условие не означает успешное совпадение.
 def selector(value, depth=0):
     keys(value, FIELDS | {"metrics", "all", "any", "not", "ancestor", "descendant"})
@@ -172,7 +172,7 @@ def selector(value, depth=0):
                 pattern(argument)
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+# atomic-spec://ATOMIC-GUARD-001/DR-15
 # Одинаковые обязательства покрытия должны применяться к сопоставимым конструкциям разных языков без выдумывания их бизнес-смысла.
 def node_type(unit):
     kind, role = unit["kind"], unit.get("role", "")
@@ -211,10 +211,10 @@ def node_type(unit):
     return "other"
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+# atomic-spec://ATOMIC-GUARD-001/DR-15
 # Порог покрытия опирается на измеримый синтаксис; размер и вложенность не являются доказательством отдельного бизнес-правила.
 class Facts:
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Метрики и владельцы должны описывать один и тот же исходный блок: иначе порог или наследование покрытия применятся к чужому коду.
     def __init__(self, path, parsed):
         self.path = path
@@ -276,7 +276,7 @@ class Facts:
                 )
         self.match_cache = {}
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Соседний узел на той же строке не является родителем и не даёт права наследовать его разметку.
     @staticmethod
     def contains(parent, child):
@@ -284,12 +284,12 @@ class Facts:
         b = (parent["end"], parent.get("end_column", 1))
         c = (child["start"], child.get("column", 1))
         d = (child["end"], child.get("end_column", 1))
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+        # atomic-spec://ATOMIC-GUARD-001/DR-15
         # Secondary Call того же вызова сценария сохраняет его владельца; соседний равный по строке код сюда не попадает.
         registration_call = a == c and b == d and parent["node"] == "scenario" and child["node"] == "call"
         return a <= c and b >= d and (a != c or b != d or registration_call)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Повторная оценка одного условия на неизменном блоке обязана давать тот же результат; ускорение не может менять решение политики.
     def matches(self, select, unit):
         key = (id(select), id(unit))
@@ -299,7 +299,7 @@ class Facts:
         self.match_cache[key] = result
         return result
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Решение политики зависит только от объявленных предикатов и фактов кода, а не от исполнения произвольной логики из конфига.
     def _matches(self, select, unit):
         for field, condition in select.items():
@@ -355,16 +355,16 @@ class Facts:
         return True
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+# atomic-spec://ATOMIC-GUARD-001/DR-14
 # Политика является данными с явными профилями, сообщениями и исключениями конкретных правил.
 class Policy:
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Рабочая политика должна иметь однозначные правила, параметры и выбранные профили; некорректные настройки не дают допустимого результата проверки.
     def __init__(self, text, profiles=None):
         if len(text.encode()) > 256 * 1024:
             raise ValueError("policy exceeds 256 KiB")
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+        # atomic-spec://ATOMIC-GUARD-001/DR-14
         # Дубли JSON-ключей вызывают отказ, а не молча перезаписывают предыдущие правила.
         def pairs(items):
             result = {}
@@ -412,7 +412,7 @@ class Policy:
         for name in parameters:
             identity(name)
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+        # atomic-spec://ATOMIC-GUARD-001/DR-14
         # Порог правила и его объяснение должны использовать одно объявленное значение; иначе диагностика вводит автора в заблуждение.
         def expand(value):
             if isinstance(value, dict):
@@ -477,7 +477,7 @@ class Policy:
                 "notice" if code == "SPEC_NOTICE" else "error"
             ):
                 raise ValueError(f"{code}: integrity severity cannot be overridden")
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+        # atomic-spec://ATOMIC-GUARD-001/DR-22
         # Языковая проверка бинарна по наличию кириллицы; проценты и вероятностная трактовка не принимаются.
         self.annotation_language = c.get("annotation_language")
         if self.annotation_language is not None:
@@ -489,7 +489,7 @@ class Policy:
             if not isinstance(language["diagnostic"], str):
                 raise ValueError("annotation language diagnostic must be a string")
             self.require_diagnostic(language["diagnostic"])
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-23
+        # atomic-spec://ATOMIC-GUARD-001/DR-23
         # Необязательный запрет повторов использует отдельную диагностику и действует строго внутри файла.
         self.annotation_uniqueness = c.get("annotation_uniqueness")
         if self.annotation_uniqueness is not None:
@@ -497,7 +497,7 @@ class Policy:
             if not isinstance(self.annotation_uniqueness["diagnostic"], str):
                 raise ValueError("annotation uniqueness diagnostic must be a string")
             self.require_diagnostic(self.annotation_uniqueness["diagnostic"])
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-25
+        # atomic-spec://ATOMIC-GUARD-001/DR-25
         # Локальная база ограничивает выбор изменений, но не понижает ошибки выбранного кода до предупреждений.
         self.local_enforcement = c.get("local_enforcement")
         if self.local_enforcement is not None:
@@ -550,7 +550,7 @@ class Policy:
                 raise ValueError("profile references unknown rule or exclusion")
         active_rules, active_exclusions, selected = [], [], []
 
-        # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+        # atomic-spec://ATOMIC-GUARD-001/DR-14
         # Неизвестный или циклический профиль не определяет рабочую политику и должен быть отклонён вместо частичного применения.
         def visit(name, stack):
             if name not in c["profiles"] or name in stack:
@@ -575,7 +575,7 @@ class Policy:
         self.rules = [(name, c["rules"][name]) for name in dict.fromkeys(active_rules)]
         self.exclusions = [(name, c["exclusions"][name]) for name in dict.fromkeys(active_exclusions)]
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Правила ссылаются только на известные диагностики и не подменяют проверки целостности.
     def require_diagnostic(self, code):
         identity(code)
@@ -587,7 +587,7 @@ class Policy:
         }:
             raise ValueError(f"unknown or reserved diagnostic {code}")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+    # atomic-spec://ATOMIC-GUARD-001/DR-16
     # Полное исключение файла сохраняет явно заданные причину и область.
     def exclude_file(self, path):
         return next(
@@ -595,7 +595,7 @@ class Policy:
             None,
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-14
+    # atomic-spec://ATOMIC-GUARD-001/DR-14
     # Сообщение обязано объяснять фактическое нарушение выбранного правила; несуществующие параметры не могут подставлять выдуманный контекст.
     def emit(self, code, unit, rule="", reason=""):
         template = self.diagnostics[code]
@@ -620,7 +620,7 @@ class Policy:
             group_by=template["group_by"],
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Покрытие останавливается на границе функции; вложенная функция не заимствует чужие требования.
     @staticmethod
     def owner(unit, coverage):
@@ -635,7 +635,7 @@ class Policy:
             current = current["parent"]
         return outer
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-16
+    # atomic-spec://ATOMIC-GUARD-001/DR-16
     # Исключение или группировка обязаны оставаться объяснимыми; они не освобождают от проверки целостности явно написанной ссылки.
     def evaluate(self, facts, changed, valid, explain=False):
         output, trace, pending = [], [], {}
@@ -742,7 +742,7 @@ class Policy:
         return output, trace
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+# atomic-spec://ATOMIC-GUARD-001/DR-15
 # Одна группа не создаёт повторных обязательств, но разные неразмеченные узлы нельзя сливать в одно покрытие.
 def annotation_key(unit):
     if unit.get("refs"):

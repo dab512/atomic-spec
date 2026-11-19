@@ -17,42 +17,42 @@ from specguard_policy import Policy
 ROOT = Path(__file__).resolve().parents[1]
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+# atomic-spec://ATOMIC-GUARD-001/DR-19
 # YAML является только данными; неоднозначный или исполняемый синтаксис не подменяет строгую схему.
 class YamlPolicyTests(unittest.TestCase):
     def load(self, text, path="policy.yaml"):
         return guard.policy_document(SimpleNamespace(node=NODE, node_modules=MODULES), path, text)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+    # atomic-spec://ATOMIC-GUARD-001/DR-19
     # Комментарии в YAML не должны менять тип и смысл объявленных значений политики.
     def test_yaml_comments_and_scalar_types(self):
-        result = json.loads(self.load("# policy\nversion: 1\nflag: false\nname: skillstore\nitems: [base, frontend]\n"))
+        result = json.loads(self.load("# policy\nversion: 1\nflag: false\nname: sample\nitems: [base, frontend]\n"))
         self.assertEqual(
             result,
             {
                 "version": 1,
                 "flag": False,
-                "name": "skillstore",
+                "name": "sample",
                 "items": ["base", "frontend"],
             },
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+    # atomic-spec://ATOMIC-GUARD-001/DR-19
     # Проектный YAML проходит действующую схему политики.
     def test_project_yaml_passes_existing_schema(self):
-        source = (ROOT / "tests/fixtures/skillstore-policy.yaml").read_text()
+        source = (ROOT / "tests/fixtures/sample-policy.yaml").read_text()
         policy = Policy(self.load(source))
-        self.assertIn("skillstore", policy.profiles)
+        self.assertIn("sample", policy.profiles)
         self.assertEqual(policy.diagnostics["SPEC_ACCESS"]["severity"], "error")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+    # atomic-spec://ATOMIC-GUARD-001/DR-19
     # Совместимость JSON сохраняет проверку дублирующихся ключей.
     def test_json_compatibility_retains_duplicate_validation(self):
         text = '{"version":1,"version":2}'
         with self.assertRaisesRegex(ValueError, "duplicate"):
             Policy(self.load(text, "policy.json"))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+    # atomic-spec://ATOMIC-GUARD-001/DR-19
     # Неоднозначный или исполняемый YAML отклоняется.
     def test_ambiguous_or_executable_yaml_is_rejected(self):
         cases = [
@@ -72,24 +72,24 @@ class YamlPolicyTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaises(ValueError):
                 self.load(text)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+    # atomic-spec://ATOMIC-GUARD-001/DR-19
     # Неизвестные поля YAML по-прежнему являются ошибкой схемы.
     def test_unknown_yaml_schema_keys_still_fail(self):
         with self.assertRaisesRegex(ValueError, "configuration fields"):
             Policy(self.load("version: 1\ntyppo: 2\n"))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+    # atomic-spec://ATOMIC-GUARD-001/DR-19
     # Чрезмерно большая политика должна быть отвергнута до её применения, не создавая видимость успешной проверки.
     def test_yaml_size_limit_precedes_decoding(self):
         with self.assertRaisesRegex(ValueError, "256 KiB"):
             self.load("#" + "x" * (256 * 1024))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-19
+    # atomic-spec://ATOMIC-GUARD-001/DR-19
     # CLI хеширует исходные YAML-байты с комментариями, а не промежуточный JSON.
     def test_cli_preserves_raw_yaml_provenance(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            source = "# provenance comment\n" + (ROOT / "tests/fixtures/skillstore-policy.yaml").read_text()
+            source = "# provenance comment\n" + (ROOT / "tests/fixtures/sample-policy.yaml").read_text()
             (root / "policy.yaml").write_text(source)
             doc = root / SPEC.split("#")[0]
             doc.parent.mkdir(parents=True)

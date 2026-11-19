@@ -40,9 +40,27 @@ def source_files(root):
     )
 
 
+# atomic-spec://ARCH-RELEASE-001/DR-4
+# Публикационная политика применяется к содержимому и путям всех поставляемых файлов, включая вложенный комплект.
+def validate_distribution_names(root):
+    policy = json.loads((root / "distribution-policy.json").read_text())
+    names = ["".join(map(chr, value)) for value in policy["excluded_names"]]
+    tokens = ["".join(map(chr, value)) for value in policy["excluded_tokens"]]
+    for path in source_files(root):
+        name = path.relative_to(root).as_posix()
+        text = name + "\n" + path.read_bytes().decode("utf-8", errors="replace")
+        lowered = text.casefold()
+        if any(value in lowered for value in names) or any(
+            re.search(r"(?<![a-z0-9])" + re.escape(value) + r"(?![a-z0-9])", lowered)
+            for value in tokens
+        ):
+            raise ValueError(f"excluded distribution reference: {name}")
+
+
 # atomic-spec://ARCH-RELEASE-001/DR-2
 # Изменённый поставляемый исходник не может сохранять доказательство происхождения прежней версии Guard.
 def validate(root=ROOT):
+    validate_distribution_names(root)
     release = json.loads((root / "release.json").read_text())
     version = release["version"]
     if json.loads((root / "plugin.json").read_text())["version"] != version:

@@ -10,10 +10,10 @@ import unittest
 from test_detector import guard, GO_PARSER, NODE, MODULES, P
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+# atomic-spec://ATOMIC-GUARD-001/DR-3
 # Старые префиксы и пути не удовлетворяют разметке ни в одном поддерживаемом адаптере.
 class UriOnlyTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # Допустимость аннотации определяется форматом URI, реальным пояснением и существующим требованием; окружение не может подменять эти условия.
     def invoke(self, path, marker, configured=False):
         with tempfile.TemporaryDirectory() as directory:
@@ -43,7 +43,7 @@ class UriOnlyTests(unittest.TestCase):
             (root / path).write_text(source)
             config_args = []
             if configured:
-                (root / "policy.yaml").write_bytes((P / "tests/fixtures/skillstore-policy.yaml").read_bytes())
+                (root / "policy.yaml").write_bytes((P / "tests/fixtures/sample-policy.yaml").read_bytes())
                 config_args = ["--config", "policy.yaml"]
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
@@ -66,14 +66,14 @@ class UriOnlyTests(unittest.TestCase):
                 )
             return code, json.loads(output.getvalue())
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # Bare URI с последующим пояснением принимается в Go, Python, TypeScript и YAML.
     def test_only_bare_uri_is_accepted(self):
         for path in ["a.py", "a.go", "a.ts", "a.yaml"]:
             code, report = self.invoke(path, "atomic-spec://ONLY-URI-001/DR-1")
             self.assertEqual(code, 0, (path, report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # И путь с Spec:, и префикс Spec: перед URI должны давать явный отказ вместо старой совместимости.
     def test_legacy_markers_are_rejected(self):
         for path in ["a.py", "a.go", "a.ts", "a.yaml"]:
@@ -84,7 +84,7 @@ class UriOnlyTests(unittest.TestCase):
                 code, report = self.invoke(path, marker)
                 self.assertEqual(code, 1, (path, marker, report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # Проектная политика не возвращает совместимость файловых маркеров поверх строгих адаптеров.
     def test_configured_policy_is_uri_only(self):
         for path in ["a.py", "a.go", "a.ts", "a.yaml"]:
@@ -96,7 +96,7 @@ class UriOnlyTests(unittest.TestCase):
                 code, report = self.invoke(path, marker, configured=True)
                 self.assertEqual(code, expected, (path, marker, report["diagnostics"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+    # atomic-spec://ATOMIC-GUARD-001/DR-8
     # Устаревший адаптер не может молча вернуть поддержку прежнего формата и пустой успешный отчёт.
     def test_stale_adapter_contract_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

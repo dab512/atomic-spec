@@ -1,4 +1,4 @@
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+// atomic-spec://ATOMIC-GUARD-001/DR-7
 // Проверка разметки не должна требовать сборки проверяемого проекта или исполнения его кода.
 package main
 
@@ -15,14 +15,14 @@ import (
 	"strings"
 )
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-1
+// atomic-spec://ATOMIC-GUARD-001/DR-1
 // Проверке подлежит только выбранный исходник; соседние файлы не расширяют область проверки.
 type Input struct {
 	Path   string `json:"path"`
 	Source string `json:"source"`
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+// atomic-spec://ATOMIC-GUARD-001/DR-8
 // Для каждого обязательства покрытия должна быть известна точная область кода и принадлежащая ей разметка.
 type Unit struct {
 	ASTNodes     int      `json:"ast_nodes"`
@@ -45,7 +45,7 @@ type Unit struct {
 	Owner        string   `json:"owner,omitempty"`
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+// atomic-spec://ATOMIC-GUARD-001/DR-8
 // Неудачный разбор нельзя выдавать за отсутствие нарушений: потребитель должен отличать ошибку от пустого файла.
 type Result struct {
 	FactsVersion int      `json:"facts_version"`
@@ -59,7 +59,7 @@ type Result struct {
 	CodeLines    []int    `json:"code_lines"`
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+// atomic-spec://ATOMIC-GUARD-001/DR-3
 // Ссылка в данных не выполняет обязательство разметки; пояснение относится только к соседнему блоку кода.
 func annotation(groups []*ast.CommentGroup, fs *token.FileSet, start int) (int, []string, string) {
 	var refs []string
@@ -108,7 +108,7 @@ func annotation(groups []*ast.CommentGroup, fs *token.FileSet, start int) (int, 
 	return commentStart, refs, strings.Join(validNotes, "\n")
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+// atomic-spec://ATOMIC-GUARD-001/DR-2
 // Самостоятельный сценарий требует покрытия; одного имени Test недостаточно, чтобы считать функцию сценарием.
 func testingParameter(params *ast.FieldList, aliases map[string]bool) bool {
 	if params == nil {
@@ -131,7 +131,7 @@ func testingParameter(params *ast.FieldList, aliases map[string]bool) bool {
 	return false
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+// atomic-spec://ATOMIC-GUARD-001/DR-17
 // Ослабление для табличных случаев допустимо только для данных этой таблицы; совпадение имён не освобождает посторонний код от покрытия.
 func tableLiteral(expr ast.Expr) *ast.CompositeLit {
 	if id, ok := expr.(*ast.Ident); ok && id.Obj != nil {
@@ -156,7 +156,7 @@ func tableLiteral(expr ast.Expr) *ast.CompositeLit {
 	return lit
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+// atomic-spec://ATOMIC-GUARD-001/DR-17
 // Сценарии и их входные данные имеют разные обязательства покрытия: вспомогательные данные не должны скрывать самостоятельный сценарий.
 func testSyntax(file *ast.File) (map[*ast.FuncLit]*ast.CallExpr, map[ast.Node]bool, []*ast.FuncLit, map[string]bool) {
 	aliases := map[string]bool{}
@@ -242,7 +242,7 @@ func testSyntax(file *ast.File) (map[*ast.FuncLit]*ast.CallExpr, map[ast.Node]bo
 	return runs, rows, fixtures, aliases
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+// atomic-spec://ATOMIC-GUARD-001/DR-9
 // Статически известный SQL остаётся кандидатом при составной записи; неизвестный запрос нельзя представлять как разобранный.
 func constantSQL(expr ast.Expr, depth int) (string, bool) {
 	if depth > 16 {
@@ -279,7 +279,7 @@ func constantSQL(expr ast.Expr, depth int) (string, bool) {
 	return "", false
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+// atomic-spec://ATOMIC-GUARD-001/DR-9
 // Операции с данными остаются кандидатами бизнес-правил; обычный текст с SQL-словами не доказывает наличие такой операции.
 func sqlQuery(call *ast.CallExpr) string {
 	sel, ok := call.Fun.(*ast.SelectorExpr)
@@ -322,7 +322,7 @@ func sqlQuery(call *ast.CallExpr) string {
 	return name
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+// atomic-spec://ATOMIC-GUARD-001/DR-2
 // Изменение блока сохраняет его обязательство покрытия; разметка другого блока не должна случайно засчитываться за него.
 func inspect(input Input) Result {
 	fs := token.NewFileSet()
@@ -514,7 +514,7 @@ func inspect(input Input) Result {
 		}
 		return true
 	})
-	// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-2
+	// atomic-spec://ATOMIC-GUARD-001/DR-2
 	// Соседние и вложенные блоки на одной строке сохраняют самостоятельные границы покрытия.
 	sort.SliceStable(out.Units, func(i, j int) bool {
 		a, b := out.Units[i], out.Units[j]
@@ -547,7 +547,7 @@ func inspect(input Input) Result {
 	return out
 }
 
-// atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+// atomic-spec://ATOMIC-GUARD-001/DR-7
 // Выбранная пачка не должна требовать отдельного запуска парсера для каждой ссылки: это ограничивает стоимость проверки.
 func main() {
 	var inputs []Input

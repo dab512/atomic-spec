@@ -8,10 +8,10 @@ from specguard_policy import Policy
 import test_policy
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+# atomic-spec://ATOMIC-GUARD-001/DR-22
 # Сравниваем настоящее пояснение с требуемым бинарным классом алфавита, не ослабляя валидность ссылки.
 class AnnotationLanguageTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Явная настройка языка должна переопределять язык требования без изменения прочих обязательств проверки.
     def configured(self, severity="error", language="auto"):
         config = deepcopy(test_policy.CONFIG)
@@ -29,7 +29,7 @@ class AnnotationLanguageTests(unittest.TestCase):
         }
         return config
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Оценка языка должна зависеть от пояснения и его требования; строковая имитация разметки не может выполнять это обязательство.
     def run_case(self, requirement, comment, severity="error", enabled=True, language="auto"):
         config = self.configured(severity, language)
@@ -42,7 +42,7 @@ class AnnotationLanguageTests(unittest.TestCase):
             spec_text="---\nid: TEST\nstatus: review\n---\n### DR-2. Rule\n" + requirement + "\n",
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Один символ кириллицы достаточен независимо от его доли в пояснении или требовании.
     def test_auto_uses_any_cyrillic_without_percentages(self):
         for comment, expected in [
@@ -53,7 +53,7 @@ class AnnotationLanguageTests(unittest.TestCase):
             code, report = self.run_case("English requirement " * 100 + "я", comment)
             self.assertEqual(code, expected, report["diagnostics"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Явный режим переопределяет язык требования и выполняет заданную семантику ru/en.
     def test_explicit_mode_overrides_requirement(self):
         for requirement, comment, language, expected in [
@@ -65,27 +65,27 @@ class AnnotationLanguageTests(unittest.TestCase):
             code, report = self.run_case(requirement, comment, language=language)
             self.assertEqual(code, expected, report["diagnostics"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Метка en означает отсутствие кириллицы; она не различает греческий и английский как естественные языки.
     def test_non_cyrillic_text_counts_as_en(self):
         for comment in ["English text.", "Ελληνικό κείμενο", "中文说明"]:
             code, report = self.run_case("The requirement is formal.", comment)
             self.assertEqual(code, 0, report["diagnostics"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Расширенные и нерусские кириллические буквы удовлетворяют простой проверке наличия.
     def test_unicode_cyrillic_is_recognized(self):
         for comment in ["Ї", "і", "Ӂ", "Ꙁ"]:
             code, report = self.run_case("The requirement.", comment, language="ru")
             self.assertEqual(code, 0, report["diagnostics"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # В auto проверяем весь исходный блок требования с примерами, не удаляя из него кириллицу.
     def test_requirement_examples_are_not_filtered(self):
         code, report = self.run_case("The rule.\n```text\nпример\n```", "English explanation.")
         self.assertEqual(code, 1, report["diagnostics"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Предупреждение не инвалидирует ссылку; отсутствие настройки отключает только проверку языка.
     def test_warning_and_disabled_policy_do_not_block(self):
         for severity, enabled in [("warning", True), ("error", False)]:
@@ -93,7 +93,7 @@ class AnnotationLanguageTests(unittest.TestCase):
             self.assertEqual(code, 0, report["diagnostics"])
             self.assertEqual(report["summary"]["error"], 0)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-22
+    # atomic-spec://ATOMIC-GUARD-001/DR-22
     # Неверные режимы и устаревшие поля порогов отклоняются, а не меняют политику молча.
     def test_configuration_rejects_modes_and_old_percentages(self):
         for value in ["de", [], False, None]:

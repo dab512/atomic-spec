@@ -7,10 +7,10 @@ from types import SimpleNamespace
 from test_detector import guard, parse, GO_PARSER, NODE, MODULES, SPEC
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+# atomic-spec://ATOMIC-GUARD-001/DR-9
 # Настройка группировки должна сохранять проверенные классы кандидатов и не выдавать их число за доказательство смысловой полноты.
 class TunedTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+    # atomic-spec://ATOMIC-GUARD-001/DR-8
     # Допустимый обработчик исключения без имени не должен срывать проверку остального файла или терять своё обязательство покрытия.
     def test_unaliased_exception_handler_has_string_owner(self):
         parsed = guard.python_source(
@@ -23,14 +23,14 @@ class TunedTests(unittest.TestCase):
         self.assertIsInstance(handler["name"], str)
         self.assertTrue(guard.tuned_units("a.py", parsed["units"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Подсказки идентификаторов учитывают границы слов.
     def test_identifier_word_boundaries(self):
         self.assertEqual(guard.identifier_hints("publicationRules"), ["rules"])
         self.assertEqual(guard.identifier_hints("permissionMatrix"), ["permission"])
         self.assertEqual(guard.identifier_hints("ruler"), [])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Таблица правил остаётся кандидатом независимо от того, объявлена ли она на уровне модуля.
     def test_go_module_tables_are_selected(self):
         source = 'package a\nvar ActionRoles = map[string][]string{\n"handover": {"admin"},\n}\n'
@@ -38,14 +38,14 @@ class TunedTests(unittest.TestCase):
         self.assertTrue(guard.select_units(result, {3}))
         self.assertTrue(any("ActionRoles" in u["name"] for u in result["units"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Константа с признаком политики остаётся видимой подсказкой для ревью, а не исчезает вне функции.
     def test_go_const_policy_exists(self):
         result = parse("a.go", "package a\nconst (\nmaxRetries = 6\npollInterval = 30\n)\n")
         self.assertTrue(guard.select_units(result, {3}))
         self.assertTrue(guard.select_units(result, {4}))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Условие доступа в JSX остаётся кандидатом решения, даже если оно записано внутри представления.
     def test_tsx_access_decision_exists(self):
         result = parse("a.tsx", "function App() {\nreturn <div>{canEdit && <Button />}</div>;\n}")
@@ -55,7 +55,7 @@ class TunedTests(unittest.TestCase):
             )
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Краткая форма условия или выбора значения не должна скрывать кандидат решения из ревью.
     def test_ts_conditional_and_coalesce(self):
         result = parse("a.ts", 'function f(x) {\nreturn x ? (x.value ?? "default") : null;\n}')
@@ -64,25 +64,25 @@ class TunedTests(unittest.TestCase):
             any(u["kind"] == "BinaryExpression" or "coalesce" in u["name"].lower() for u in result["units"])
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Вызов на уровне модуля не исчезает из анализа.
     def test_module_call_not_lost(self):
         result = parse("a.ts", 'configureNavigation({lang: "ru"});\nexport function App() {}\n')
         self.assertTrue(guard.select_units(result, {1}))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-8
+    # atomic-spec://ATOMIC-GUARD-001/DR-8
     # Настройка YAML сохраняет собственную область применения требования и не растворяется в соседних значениях.
     def test_yaml_record_exists(self):
         result = parse("a.yaml", "rules:\n  - id: admin\n    required: true\n")
         self.assertTrue(any("Item" in u["kind"] or "Record" in u["kind"] for u in result["units"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Глобальное объявление Python остаётся кандидатом.
     def test_python_declaration_exists(self):
         result = guard.python_source({"path": "a.py", "source": "MAX_RETRIES = 6\n"})
         self.assertTrue(guard.select_units(result, {1}))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Статическая операция с данными остаётся кандидатом бизнес-правила и при записи на Python.
     def test_python_sql_candidate(self):
         result = guard.python_source(
@@ -93,7 +93,7 @@ class TunedTests(unittest.TestCase):
         )
         self.assertEqual(sum(u.get("role") == "sql" for u in result["units"]), 1)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Похожий на SQL текст вне операции с данными не создаёт ложного кандидата запроса.
     def test_sql_lookalike_is_not_query(self):
         result = guard.python_source(
@@ -104,7 +104,7 @@ class TunedTests(unittest.TestCase):
         )
         self.assertFalse(any(u.get("role") == "sql" for u in result["units"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-3
+    # atomic-spec://ATOMIC-GUARD-001/DR-3
     # Текст SQL не выполняет обязанность описать правило запроса настоящим spec-комментарием.
     def test_sql_text_is_not_annotation(self):
         result = guard.python_source(
@@ -116,7 +116,7 @@ class TunedTests(unittest.TestCase):
         sql = next(u for u in result["units"] if u.get("role") == "sql")
         self.assertFalse(sql["refs"])
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-17
+    # atomic-spec://ATOMIC-GUARD-001/DR-17
     # Параметризованные входы теста не должны ошибочно становиться самостоятельными сценариями покрытия.
     def test_python_parametrize_cases(self):
         result = guard.python_source(
@@ -127,7 +127,7 @@ class TunedTests(unittest.TestCase):
         )
         self.assertEqual(sum(u["kind"] == "PytestCase" for u in result["units"]), 3)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Связанные проверки результата могут рассматриваться вместе; это группировка кандидатов, а не доказательство единственного бизнес-правила.
     def test_assertions_cluster(self):
         result = guard.python_source(
@@ -138,14 +138,14 @@ class TunedTests(unittest.TestCase):
         )
         self.assertEqual(sum(u["kind"] == "AssertionGroup" for u in result["units"]), 2)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Настроенная выборка сохраняет SQL внутри функции.
     def test_tuned_retains_sql_inside_function(self):
         result = guard.python_source({"path": "a.py", "source": 'def f(db):\n    db.execute("SELECT 1")\n'})
         tuned = guard.tuned_units("a.py", result["units"])
         self.assertTrue(any(u.get("role") == "sql" for u in tuned))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Локальный capability-гейт остаётся видимым кандидатом.
     def test_local_capability_gate(self):
         result = parse(
@@ -154,7 +154,7 @@ class TunedTests(unittest.TestCase):
         )
         self.assertTrue(any(u["kind"] == "CapabilityGate" and u["start"] == 2 for u in result["units"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-9
+    # atomic-spec://ATOMIC-GUARD-001/DR-9
     # Имя с признаком rule остаётся синтаксической подсказкой.
     def test_local_rule_name_remains_candidate(self):
         result = parse(
@@ -163,7 +163,7 @@ class TunedTests(unittest.TestCase):
         )
         self.assertTrue(any(u["name"] == "retryPolicy" for u in guard.tuned_units("a.ts", result["units"])))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-15
+    # atomic-spec://ATOMIC-GUARD-001/DR-15
     # Чувствительное изменение прав не должно исчезать из диагностики при применении группировки кандидатов.
     def test_permission_regression_real_analyzer(self):
         file = "a.go"

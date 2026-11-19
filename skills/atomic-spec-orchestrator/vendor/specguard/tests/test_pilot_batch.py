@@ -10,10 +10,10 @@ from pathlib import Path
 from test_detector import GO_PARSER, MODULES, NODE, P
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+# atomic-spec://ATOMIC-GUARD-001/DR-7
 # Выводы пилота относятся только к явно выбранным исходникам; соседнее дерево не расширяет доказательства качества.
 class PilotBatchTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+    # atomic-spec://ATOMIC-GUARD-001/DR-7
     # Новый корпус воспроизводим и не изменяет исходные файлы.
     def test_new_corpus_is_reproducible_and_read_only(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -57,7 +57,7 @@ class PilotBatchTests(unittest.TestCase):
             self.assertEqual(repeated.returncode, 0, repeated.stderr)
             self.assertTrue((output / "diagnostics.md").exists())
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-7
+    # atomic-spec://ATOMIC-GUARD-001/DR-7
     # Изменённый замороженный корпус не может подтверждать прежние результаты и не даёт права перезаписать эталон.
     def test_changed_frozen_input_is_rejected_without_rewriting_it(self):
         with tempfile.TemporaryDirectory() as folder:

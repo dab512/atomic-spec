@@ -1,5 +1,9 @@
 {
   "repository": "https://github.com/dab512/atomic-spec-guard",
   "revision": "34c096ef1ac8cebdc042647572f111ffcda9fa72",
-  "mode": "git archive; source files unchanged; ORIGIN.json added by distribution"
+  "mode": "distribution adaptation; neutral requirement namespace, fixture names and documentation; current file set and SHA-256 recorded in the distribution manifest",
+  "patches": [
+    "Project-neutral identifiers, examples and fixture paths",
+    "Generic pinned repository-viewer URL fixture; Git execution unchanged"
+  ]
 }

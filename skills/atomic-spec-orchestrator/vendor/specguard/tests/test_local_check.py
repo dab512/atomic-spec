@@ -12,7 +12,7 @@ from test_detector import write_test_registry
 from test_detector import GO_PARSER, MODULES, NODE, P, SPEC
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+# atomic-spec://ATOMIC-GUARD-001/DR-18
 # Локальный допуск должен отражать реальные сохранённые изменения, а не подменять их заранее рассчитанным результатом.
 class LocalCheckTests(unittest.TestCase):
     def run_local(
@@ -30,13 +30,13 @@ class LocalCheckTests(unittest.TestCase):
     ):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            path = "marvel/skillstore/services/skillstore/internal/sample.py"
+            path = "example/sample/services/sample/internal/sample.py"
             target = root / path
             target.parent.mkdir(parents=True)
             target.write_text(source)
-            config = root / "marvel/skillstore/services/atomic/atomic-spec-guard.yaml"
+            config = root / "example/sample/services/atomic/atomic-spec-guard.yaml"
             config.parent.mkdir(parents=True)
-            config.write_text((P / "tests/fixtures/skillstore-policy.yaml").read_text())
+            config.write_text((P / "tests/fixtures/sample-policy.yaml").read_text())
             if modified_at is not None:
                 os.utime(target, (modified_at, modified_at))
             doc = root / SPEC.split("#")[0]
@@ -45,8 +45,8 @@ class LocalCheckTests(unittest.TestCase):
             write_test_registry(root, SPEC.split("#")[0])
             bindir = root / "bin"
             bindir.mkdir()
-            arc = bindir / "git"
-            arc.write_text(
+            vcs = bindir / "git"
+            vcs.write_text(
                 "#!/usr/bin/env python3\n"
                 "import json,os,sys\n"
                 "a=sys.argv[1:]\n"
@@ -64,7 +64,7 @@ class LocalCheckTests(unittest.TestCase):
                 "elif a[0]=='show' and a[1].endswith('sample.py'): print(os.environ['TEST_OLD'],end='')\n"
                 "else: sys.exit(3)\n"
             )
-            arc.chmod(0o755)
+            vcs.chmod(0o755)
             env = dict(
                 os.environ,
                 PATH=str(bindir) + os.pathsep + os.environ["PATH"],
@@ -78,15 +78,15 @@ class LocalCheckTests(unittest.TestCase):
                 SPECGUARD_NODE=NODE,
                 SPECGUARD_NODE_MODULES=MODULES,
                 SPECGUARD_CACHE_DIR=str(root / "cache"),
-                SPECGUARD_CONFIG="marvel/skillstore/services/atomic/atomic-spec-guard.yaml",
-                SPECGUARD_SCOPE="marvel/skillstore/services/skillstore",
+                SPECGUARD_CONFIG="example/sample/services/atomic/atomic-spec-guard.yaml",
+                SPECGUARD_SCOPE="example/sample/services/sample",
                 SPECGUARD_LOCAL_ENTRYPOINT=str(P / "scripts/local-check.sh"),
             )
             env.pop("SPECGUARD_BASE", None)
             if explicit_base is not None:
                 env["SPECGUARD_BASE"] = explicit_base
             if restart:
-                source = (P / "tests/fixtures/skillstore-local-preflight.sh").read_text()
+                source = (P / "tests/fixtures/sample-local-preflight.sh").read_text()
                 body = source.split("restart_backend() {", 1)[1].split("\n}\n", 1)[0]
                 env["LOCAL_SPECGUARD"] = str(P / "scripts/local-check.sh")
                 env["LOCAL_SKIP_SPECS"] = "0"
@@ -99,7 +99,7 @@ class LocalCheckTests(unittest.TestCase):
             elif entrypoint:
                 args = [
                     "bash",
-                    str(P / "tests/fixtures/skillstore-local-preflight.sh"),
+                    str(P / "tests/fixtures/sample-local-preflight.sh"),
                     "--check-specs",
                 ]
             else:
@@ -107,7 +107,7 @@ class LocalCheckTests(unittest.TestCase):
             result = subprocess.run(args, cwd=root, env=env, text=True, capture_output=True, timeout=30)
             return result
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Проверяется изменённый незакоммиченный текст, а не прежняя версия файла.
     def test_current_unstaged_bytes_fail(self):
         old = "# atomic-spec://TEST/DR-2\n# Применяем правило публикации.\ndef work():\n    return 1\n"
@@ -116,17 +116,17 @@ class LocalCheckTests(unittest.TestCase):
         self.assertIn("sample.py", result.stdout)
         self.assertIn("SPEC_FILE", result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Корректная текущая разметка проходит локальную проверку.
     def test_valid_current_bytes_pass(self):
         source = "# atomic-spec://TEST/DR-2\n# Применяем правило публикации.\ndef work():\n    return 2\n"
         result = self.run_local(source, source.replace("return 2", "return 1"))
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Новый неотслеживаемый файл участвует в проверке.
     def test_untracked_file_is_checked(self):
-        path = "marvel/skillstore/services/skillstore/internal/sample.py"
+        path = "example/sample/services/sample/internal/sample.py"
         result = self.run_local(
             "def work():\n    return 2\n",
             changes="",
@@ -135,7 +135,7 @@ class LocalCheckTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("SPEC_FILE", result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Предупреждение не останавливает локальный запуск.
     def test_warning_does_not_block(self):
         source = "# atomic-spec://TEST/DR-2\n# Применяем правило публикации.\ndef old():\n    return 1\n"
@@ -143,20 +143,20 @@ class LocalCheckTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertRegex(result.stdout, r"# Specguard: 0 error, [1-9][0-9]* warning")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Пустой diff не создаёт выдуманные нарушения.
     def test_empty_diff_passes(self):
         result = self.run_local("", changes="")
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Ошибочная разметка останавливает local-dev до запуска сервисов.
     def test_local_dev_stops_before_services(self):
         result = self.run_local("def work():\n    return 2\n", entrypoint=True)
         self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
         self.assertIn("SPEC_FILE", result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Отказ проверки перед рестартом сохраняет работающий backend.
     def test_restart_failure_preserves_running_backend(self):
         result = self.run_local("def work():\n    return 2\n", restart=True)
@@ -164,24 +164,24 @@ class LocalCheckTests(unittest.TestCase):
         self.assertIn("SPEC_FILE", result.stdout)
         self.assertEqual(result.stderr, "")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Удалённый файл не требует чтения отсутствующего исходника.
     def test_deleted_file_does_not_require_reading_missing_source(self):
-        path = "marvel/skillstore/services/skillstore/internal/deleted.py"
+        path = "example/sample/services/sample/internal/deleted.py"
         result = self.run_local("", changes="D\t" + path)
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Невалидная ссылка блокирует локальную сборку.
     def test_invalid_reference_blocks_local_build(self):
         result = self.run_local("# atomic-spec://MADE-UP/DR-999\n# Explanation.\ndef work():\n    return 2\n")
         self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
         self.assertIn("SPEC004", result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Явное отключение preflight действует и при передаче параметров порта.
     def test_skip_flag_bypasses_preflight_even_with_port_arguments(self):
-        source = (P / "tests/fixtures/skillstore-local-preflight.sh").read_text()
+        source = (P / "tests/fixtures/sample-local-preflight.sh").read_text()
         prefix = source.split("# ───── Параметризация портов", 1)[0]
         with tempfile.TemporaryDirectory() as directory:
             script = Path(directory) / "local-dev.sh"
@@ -197,13 +197,13 @@ class LocalCheckTests(unittest.TestCase):
         self.assertIn("START_CONTINUES", result.stdout)
         self.assertIn("отключена", result.stdout)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-18
+    # atomic-spec://ATOMIC-GUARD-001/DR-18
     # Режим только проверки несовместим с явным отключением проверки.
     def test_skip_and_check_only_are_rejected_together(self):
         result = subprocess.run(
             [
                 "bash",
-                str(P / "tests/fixtures/skillstore-local-preflight.sh"),
+                str(P / "tests/fixtures/sample-local-preflight.sh"),
                 "--skip-atomic-spec-guard",
                 "--check-specs",
             ],

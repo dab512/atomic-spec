@@ -13,10 +13,10 @@ from test_detector import write_test_registry
 from test_detector import guard, SPEC, NODE, MODULES
 
 
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+# atomic-spec://ATOMIC-GUARD-001/DR-21
 # Выбор каталога детерминирован, ограничен и не следует по symlink или кешам.
 class DirectoryTests(unittest.TestCase):
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+    # atomic-spec://ATOMIC-GUARD-001/DR-21
     # Результат для каталога должен определяться его действительными файлами и требованиями, а не заранее заданным ответом адаптера.
     def invoke(self, root, command="audit", *extra):
         output, errors = io.StringIO(), io.StringIO()
@@ -40,7 +40,7 @@ class DirectoryTests(unittest.TestCase):
             errors.getvalue(),
         )
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-13
+    # atomic-spec://ATOMIC-GUARD-001/DR-13
     # Каталог проверяемого кода не ограничивает каталог авторитетных требований: источник выбирается отдельно и явно.
     def fixture(self, root):
         spec = root / SPEC.split("#")[0]
@@ -49,7 +49,7 @@ class DirectoryTests(unittest.TestCase):
         write_test_registry(root, SPEC.split("#")[0])
         return "# atomic-spec://TEST/DR-2\n# Meaning.\ndef work():\n    return 1\n"
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+    # atomic-spec://ATOMIC-GUARD-001/DR-21
     # Вложенные поддерживаемые файлы включаются и явно перечисляются в отчёте.
     def test_recursive_directory_collects_nested_files(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -63,7 +63,7 @@ class DirectoryTests(unittest.TestCase):
             self.assertEqual(report["input_files"], ["src/a.py", "src/nested/b.py"])
             self.assertEqual(report["scope_kind"], "directory")
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+    # atomic-spec://ATOMIC-GUARD-001/DR-21
     # Внешняя ссылка и деревья зависимостей либо кешей отмечаются пропусками и не разбираются.
     def test_symlinks_and_caches_are_not_followed(self):
         with (
@@ -84,7 +84,7 @@ class DirectoryTests(unittest.TestCase):
             self.assertEqual(report["input_files"], ["src/a.py"])
             self.assertTrue(any("symlink" in x["reason"] for x in report["excluded"]))
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+    # atomic-spec://ATOMIC-GUARD-001/DR-21
     # Превышение файлового бюджета не позволяет выдать частичный обход за полный успешный аудит.
     def test_file_limit_is_failure_not_truncation(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -97,7 +97,7 @@ class DirectoryTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("file limit", error)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+    # atomic-spec://ATOMIC-GUARD-001/DR-21
     # Обход рабочей папки не выдаётся за неизменяемый ревизионный diff.
     def test_directory_is_exclusive_with_file_or_revision_input(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -110,7 +110,7 @@ class DirectoryTests(unittest.TestCase):
                 self.assertEqual(code, 2)
                 self.assertIn("--directory", error)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-13
+    # atomic-spec://ATOMIC-GUARD-001/DR-13
     # Один ID разрешается только в выбранном spec-root; другой каталог не восполняет отсутствующий пункт.
     def test_explicit_spec_root_selects_independent_namespace(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -150,7 +150,7 @@ class DirectoryTests(unittest.TestCase):
             )
             self.assertEqual(code, 1)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+    # atomic-spec://ATOMIC-GUARD-001/DR-21
     # Лимиты записей и байтов прерывают работу до выдачи полного результата.
     def test_entry_and_source_budgets_are_enforced(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -166,7 +166,7 @@ class DirectoryTests(unittest.TestCase):
                 self.assertEqual(code, 2)
                 self.assertIn(expected, error)
 
-    # atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-21
+    # atomic-spec://ATOMIC-GUARD-001/DR-21
     # Каталог без поддерживаемых исходников образует явную пустую выборку.
     def test_empty_directory_has_empty_scope(self):
         with tempfile.TemporaryDirectory() as directory:

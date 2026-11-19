@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# atomic-spec://SKSTORE-ATOMIC-GUARD-001/DR-20
+# atomic-spec://ATOMIC-GUARD-001/DR-20
 # Локальный аудит использует собственные manifest и спеку, не включая контроль аннотаций в CI приложения.
 set -euo pipefail
 sg_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

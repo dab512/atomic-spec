@@ -70,6 +70,43 @@ class TemplateTests(unittest.TestCase):
             self.assertTrue(json.loads(result.stdout)["complete"])
 
 
+# atomic-spec://ARCH-RELEASE-001/DR-4
+# Проверка поставки обнаруживает исключённые названия в исходниках и разрешает нейтральный комплект.
+class DistributionNamesTests(unittest.TestCase):
+    # atomic-spec://ARCH-RELEASE-001/DR-4
+    # Исходная поставка без очистки должна отклоняться до выпуска очередного архива.
+    def test_current_distribution_has_independent_names(self):
+        release.validate_distribution_names(ROOT)
+
+    # atomic-spec://ARCH-RELEASE-001/DR-4
+    # Нейтральные слова не отклоняются как часть более длинного понятия; отдельный запрещённый токен блокирует сборку.
+    def test_content_and_paths_are_checked_case_insensitively(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "distribution-policy.json").write_text(
+                json.dumps(
+                    {
+                        "excluded_names": [[100, 101, 109, 111, 99, 111, 114, 112]],
+                        "excluded_tokens": [[118, 99, 115]],
+                    }
+                )
+            )
+            target = root / "example.txt"
+            target.write_text("A neutral architecture and archives.")
+            release.validate_distribution_names(root)
+            target.write_text("DEMO" + "CORP")
+            with self.assertRaisesRegex(ValueError, "excluded distribution reference"):
+                release.validate_distribution_names(root)
+            target.write_text("A neutral example.")
+            target.rename(root / ("demo" + "corp.txt"))
+            with self.assertRaisesRegex(ValueError, "excluded distribution reference"):
+                release.validate_distribution_names(root)
+            (root / ("demo" + "corp.txt")).unlink()
+            target.write_text(".VCS metadata")
+            with self.assertRaisesRegex(ValueError, "excluded distribution reference"):
+                release.validate_distribution_names(root)
+
+
 # atomic-spec://ARCH-RELEASE-001/DR-1
 # Самостоятельный архив сохраняет работоспособность вне исходного репозитория и не содержит окружения автора.
 class ArchiveTests(unittest.TestCase):
@@ -239,7 +276,7 @@ class ArchiveTests(unittest.TestCase):
         root = self.folder / "source"
         with tarfile.open(self.source) as archive:
             archive.extractall(root, filter="data")
-        root = root / "atomic-spec-2.0.1"
+        root = root / "atomic-spec-2.0.2"
         target = root / "skills/atomic-spec-orchestrator/vendor/specguard/specguard.py"
         original = target.read_bytes()
         target.write_bytes(original + b"\n# changed\n")
