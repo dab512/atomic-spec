@@ -61,3 +61,5 @@ The check command validates links, registry, Guard provenance, real extracted-sk
 journeys and page geometry. Missing dependencies and skips are not PASS.
 Normative atoms are indexed in [specs/registry.json](specs/registry.json).
 [Website](https://dab512.github.io/atomic-spec/) · [Release changes](CHANGELOG.md) · [MIT](LICENSE).
+
+For an installed Chrome, set ATOMIC_SPEC_BROWSER to its full path; GitHub CI uses the hosted runner Chrome.

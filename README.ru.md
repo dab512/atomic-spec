@@ -61,3 +61,5 @@ python tools/release.py build
 установки архива и геометрию страниц. Отсутствующие зависимости и skip не являются PASS.
 Нормативные атомы — в [specs/registry.json](specs/registry.json).
 [Сайт](https://dab512.github.io/atomic-spec/) · [Изменения релиза](CHANGELOG.md) · [MIT](LICENSE).
+
+Для установленного Chrome задайте ATOMIC_SPEC_BROWSER полным путём к браузеру; GitHub CI использует Chrome образа runner.
