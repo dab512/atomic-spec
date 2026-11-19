@@ -1,40 +1,11 @@
-# Atomic Spec — AI Agent Skill
+# Atomic Spec Orchestrator 2.0.0
 
-Скилл для Claude Code, который оркестрирует разработку по методологии Atomic Spec.
+Read [SKILL.md](SKILL.md). Business and architecture templates are in assets/;
+role guidance is in references/. This standalone archive contains the pinned Git
+Guard sources, without node_modules, platform binaries or local caches.
 
-## Установка
+Python/JSON audit works with Python 3.11+. Explicit setup for JS/TS/YAML/Go:
+`bash scripts/setup-guard.sh`. A configured project Guard always takes priority;
+do not run bundled setup or a second checker in such projects.
 
-1. Скопируйте директорию `skills/atomic-spec-orchestrator/` в `~/.claude/skills/atomic-spec-orchestrator/`:
-
-```bash
-cp -r skills/atomic-spec-orchestrator/ ~/.claude/skills/atomic-spec-orchestrator/
-```
-
-2. Переименуйте файлы:
-```
-~/.claude/skills/atomic-spec-orchestrator/
-├── SKILL.md
-├── references/
-│   ├── analyst.md
-│   ├── developer.md
-│   └── tester.md
-└── assets/
-    └── atom-template.spec.md
-```
-
-3. Claude Code автоматически обнаружит скилл и будет использовать его при работе с `*.spec.md` файлами.
-
-## Использование
-
-Скилл активируется автоматически когда вы:
-- Просите спроектировать фичу или написать требования
-- Декомпозируете задачу на атомы
-- Работаете с файлами в директории `/specs/`
-- Упоминаете "атом", "спек", "Atomic Spec", "domain rules", "acceptance criteria"
-
-## Роли
-
-Скилл переключается между тремя ролями:
-- **Аналитик** — бизнес-требования, DR, AC
-- **Разработчик** — Tech Spec, код, API
-- **Тестировщик** — Test Plan, тесты, покрытие
+See [methodology and migration](https://github.com/dab512/atomic-spec/blob/v2.0.0/docs/migration-v2.md).

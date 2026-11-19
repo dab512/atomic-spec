@@ -1,0 +1,4 @@
+{
+  "DOMAIN-USECASE-001": "specs/orders/order.spec.md",
+  "ARCH-DECISION-001": "specs/architecture/storage.spec.md"
+}

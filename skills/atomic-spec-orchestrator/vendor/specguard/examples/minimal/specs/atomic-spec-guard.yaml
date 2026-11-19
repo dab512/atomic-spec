@@ -1,0 +1,90 @@
+version: 1
+files:
+  minimum_annotations: 1
+  diagnostic: SPEC_FILE
+  exclusions: []
+diagnostics:
+  SPEC_FILE:
+    severity: error
+    title: Недостаточно валидных аннотаций
+    message: "В файле {name}: {actual_annotations} валидных аннотаций; требуется
+      {required_annotations}."
+    hint: Добавьте atomic-spec://SPEC-ID/DR-N и пояснение в комментарии.
+    params: {}
+    group_by:
+      - code
+  SPEC_COVER:
+    severity: error
+    title: Блок не покрыт требованием
+    message: "{node} «{name}»: требуется аннотация по правилу {rule}."
+    hint: Разметьте этот блок или допустимого владельца покрытия.
+    params: {}
+    group_by:
+      - code
+  SPEC002:
+    severity: error
+    title: Нет пояснения к ссылке
+    message: "{reason}"
+    hint: После URI напишите пояснение в той же группе комментариев.
+    params: {}
+    group_by:
+      - code
+  SPEC004:
+    severity: error
+    title: Невалидная ссылка
+    message: "{reason}"
+    hint: Проверьте реестр, файл спеки, статус и идентификатор требования.
+    params: {}
+    group_by:
+      - code
+  SPEC008:
+    severity: error
+    title: Файл не разобран
+    message: "{reason}"
+    hint: Исправьте синтаксис или настройку парсера; результат неполный.
+    params: {}
+    group_by:
+      - code
+  SPEC_NOTICE:
+    severity: notice
+    title: Применено исключение
+    message: "{reason}"
+    hint: Причина исключения сохранена в отчёте.
+    params: {}
+    group_by: [code]
+  SPEC_LANGUAGE:
+    severity: error
+    title: Язык пояснения не соответствует политике
+    message: "{requirement}: требуется {expected_language}, получено {actual_language}."
+    hint: ru — содержит кириллицу; en — не содержит; auto следует исходному тексту
+      требования.
+    params: {}
+    group_by:
+      - code
+      - file
+rules:
+  structural:
+    match:
+      node:
+        in:
+          - function
+          - type
+          - scenario
+    check: annotation
+    coverage: self
+    priority: 10
+    diagnostic: SPEC_COVER
+exclusions: {}
+profiles:
+  base:
+    extends: []
+    rules:
+      - structural
+    exclusions: []
+default_profiles:
+  - base
+annotation_language:
+  language: ru
+  diagnostic: SPEC_LANGUAGE
+local_enforcement:
+  base_ref: origin/main

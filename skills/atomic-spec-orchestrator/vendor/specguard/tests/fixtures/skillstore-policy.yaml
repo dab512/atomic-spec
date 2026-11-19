@@ -1,0 +1,728 @@
+# atomic-spec://SKSTORE-SPEC-TRACE-001/DR-19
+# Политика SkillStore: обязательные ссылки, рекомендательные сигналы и явные исключения.
+version: 1
+files:
+  minimum_annotations: 1
+  diagnostic: SPEC_FILE
+  exclusions:
+    - id: vendor
+      path: "*/node_modules/*"
+      reason: Зависимости поставщика проверяются в исходном проекте.
+    - id: vendor-go
+      path: "*/vendor/*"
+      reason: Внешние Go-зависимости не являются кодом SkillStore.
+    - id: generated-skillstore-ci
+      path: "marvel/skillstore/services/skillstore/a.yaml"
+      reason: Файл полностью генерируется из размеченного ci/stub.yaml; генератор не сохраняет комментарии.
+diagnostics:
+  SPEC_FILE:
+    severity: error
+    title: Недостаточно валидных аннотаций
+    message: "В файле {name}: {actual_annotations} валидных аннотаций; требуется {required_annotations}."
+    hint: Добавьте atomic-spec://SPEC-ID/DR-N и пояснение в комментарии.
+    params: {}
+    group_by:
+      - code
+  SPEC_COVER:
+    severity: error
+    title: Блок не покрыт требованием
+    message: "{node} «{name}»: требуется аннотация по правилу {rule}."
+    hint: Разметьте этот блок или допустимого владельца покрытия.
+    params: {}
+    group_by:
+      - code
+  SPEC_ACCESS:
+    severity: error
+    title: Изменено решение о доступе
+    message: "{name}: требуется ссылка на правило доступа."
+    hint: Укажите требование матрицы capability, ownership или исключения режима доступа.
+    params: {}
+    group_by:
+      - code
+  SPEC_HINT:
+    severity: warning
+    title: Кандидат на разметку
+    message: "{node} «{name}»: проверьте покрытие требованием."
+    hint: "Сигнал синтаксический: отдельное бизнес-требование не предполагается автоматически."
+    params: {}
+    group_by:
+      - code
+  SPEC_SIZE:
+    severity: warning
+    title: Крупный блок
+    message: "{name}: {code_lines} строк кода, {unit_count} синтаксических единиц, глубина решений
+      {decision_depth}."
+    hint: Порог — {limit_lines} строк кода. Проверьте достаточность разметки.
+    params:
+      limit_lines:
+        parameter: large_block_lines
+    group_by:
+      - code
+  SPEC002:
+    severity: error
+    title: Нет пояснения к ссылке
+    message: "{reason}"
+    hint: После URI напишите пояснение в той же группе комментариев.
+    params: {}
+    group_by:
+      - code
+  SPEC004:
+    severity: error
+    title: Невалидная ссылка
+    message: "{reason}"
+    hint: Проверьте реестр, файл спеки, статус и идентификатор требования.
+    params: {}
+    group_by:
+      - code
+  SPEC008:
+    severity: error
+    title: Файл не разобран
+    message: "{reason}"
+    hint: Исправьте синтаксис или настройку парсера; результат неполный.
+    params: {}
+    group_by:
+      - code
+  SPEC_NOTICE:
+    severity: notice
+    title: Применено исключение
+    message: "{reason}"
+    hint: Полная причина и идентификатор исключения сохранены в JSON/explain.
+    params: {}
+    group_by:
+      - code
+  SPEC_LANGUAGE:
+    severity: error
+    title: Язык пояснения не соответствует политике
+    message: "{requirement}: требуется {expected_language}, получено {actual_language}."
+    hint: ru — содержит кириллицу; en — не содержит; auto следует исходному тексту требования.
+    params: {}
+    group_by:
+      - code
+      - file
+  SPEC_DUPLICATE:
+    severity: error
+    title: Повторяется пояснение spec-комментария
+    message: "Одинаковое пояснение в {duplicate_count} блоках этого файла; пример: {duplicate_origin}."
+    hint: Опишите смысл конкретного блока; ссылки на одно требование повторять можно.
+    params: {}
+    group_by:
+      - code
+      - file
+rules:
+  structural:
+    match:
+      node:
+        in:
+          - function
+          - type
+          - scenario
+    check: annotation
+    coverage: self
+    priority: 10
+    diagnostic: SPEC_COVER
+  decisions:
+    match:
+      node:
+        eq: decision
+    check: annotation
+    coverage: ancestor
+    priority: 10
+    diagnostic: SPEC_COVER
+  presentation:
+    match:
+      all:
+        - language:
+            in:
+              - typescript
+              - javascript
+        - node:
+            eq: decision
+        - operator:
+            in:
+              - "&&"
+              - "||"
+              - ??
+              - "?:"
+    check: annotation
+    coverage: ancestor
+    priority: 20
+    diagnostic: SPEC_HINT
+  sql:
+    match:
+      node:
+        eq: sql
+    check: annotation
+    coverage: ancestor
+    priority: 10
+    diagnostic: SPEC_HINT
+  declarations:
+    match:
+      all:
+        - node:
+            in:
+              - declaration
+              - config
+        - not:
+            ancestor:
+              node:
+                in:
+                  - function
+                  - scenario
+                  - declaration
+                  - config
+    check: annotation
+    coverage: ancestor
+    priority: 10
+    diagnostic: SPEC_HINT
+  large-block:
+    match:
+      all:
+        - node:
+            in:
+              - function
+              - scenario
+              - sql
+              - config
+        - metrics:
+            code_lines:
+              gt:
+                parameter: large_block_lines
+        - not:
+            ancestor:
+              metrics:
+                code_lines:
+                  gt:
+                    parameter: large_block_lines
+    check: report
+    coverage: self
+    priority: 0
+    diagnostic: SPEC_SIZE
+  yaml-sections:
+    match:
+      all:
+        - language:
+            eq: yaml
+        - node:
+            eq: config
+        - metrics:
+            depth:
+              eq: 0
+    check: annotation
+    coverage: self
+    priority: 30
+    diagnostic: SPEC_HINT
+  ci-jobs:
+    match:
+      all:
+        - language:
+            eq: yaml
+        - path:
+            glob: "*/a.yaml"
+        - config_path:
+            regex: ^ci\.flows\.[^.]+\.jobs\.[^.]+$
+        - kind:
+            eq: YAMLMapping
+    check: annotation
+    coverage: self
+    priority: 40
+    diagnostic: SPEC_HINT
+  lexical-guard:
+    match:
+      all:
+        - node:
+            eq: call
+        - name:
+            regex: ^canDo$|^assert$|^requirePermission$
+        - symbol:
+            eq: ""
+    check: annotation
+    coverage: ancestor
+    priority: 10
+    diagnostic: SPEC_HINT
+  access-matrix:
+    match:
+      all:
+        - path:
+            glob: "*/skillstore/internal/access/actions/actions.go"
+        - name:
+            in:
+              - ActionRoles
+              - anyAuthenticated
+              - All
+              - Can
+              - AllowedActions
+    check: annotation
+    coverage: self
+    priority: 100
+    diagnostic: SPEC_ACCESS
+  access-actions:
+    match:
+      all:
+        - path:
+            glob: "*/skillstore/internal/access/actions/actions.go"
+        - kind:
+            eq: "*ast.ValueSpec"
+    check: annotation
+    coverage: ancestor
+    priority: 90
+    diagnostic: SPEC_ACCESS
+  access-go-call:
+    match:
+      all:
+        - node:
+            in:
+              - call
+              - declaration
+        - any:
+            - symbol:
+                eq: a.yandex-team.ru/marvel/skillstore/services/skillstore/internal/access/actions#Can
+            - all:
+                - path:
+                    glob: "*/skillstore/internal/handlers/*.go"
+                - symbol:
+                    in:
+                      - local:userCan
+                      - local:denyIfNotAllowed
+                      - local:canHandoverSkill
+                      - local:canMoveSkill
+                      - local:canManageTeam
+                      - local:canHideOwnVersion
+                      - local:canUnhideOwnVersion
+            - any:
+                - symbol:
+                    eq: a.yandex-team.ru/marvel/skillstore/services/skillstore/internal/access/actions#ActionRoles
+                - all:
+                    - path:
+                        glob: "*/skillstore/internal/access/actions/*.go"
+                    - symbol:
+                        in:
+                          - local:ActionRoles
+                          - local:anyAuthenticated
+    check: annotation
+    coverage: ancestor
+    priority: 100
+    diagnostic: SPEC_ACCESS
+  access-ts-call:
+    match:
+      all:
+        - node:
+            eq: call
+        - symbol:
+            glob: "*/skillstore-frontend/src/api/backend#canDo"
+    check: annotation
+    coverage: ancestor
+    priority: 100
+    diagnostic: SPEC_ACCESS
+  access-helpers:
+    match:
+      all:
+        - path:
+            glob: "*/skillstore/internal/handlers/types.go"
+        - node:
+            eq: function
+        - name:
+            in:
+              - userCan
+              - denyIfNotAllowed
+              - canHandoverSkill
+              - canMoveSkill
+              - canManageTeam
+              - canHideOwnVersion
+              - canUnhideOwnVersion
+    check: annotation
+    coverage: self
+    priority: 100
+    diagnostic: SPEC_ACCESS
+  access-frontend:
+    match:
+      all:
+        - path:
+            glob: "*/skillstore-frontend/src/api/backend.ts"
+        - name:
+            in:
+              - canDo
+              - isReadOnly
+              - assertWritable
+        - node:
+            eq: function
+    check: annotation
+    coverage: self
+    priority: 100
+    diagnostic: SPEC_ACCESS
+  callbacks:
+    match:
+      all:
+        - kind:
+            in:
+              - "*ast.FuncLit"
+              - ArrowFunction
+              - FunctionExpression
+        - ancestor:
+            node:
+              in:
+                - function
+                - scenario
+                - fixture
+    check: annotation
+    coverage: self
+    priority: 30
+    diagnostic: SPEC_HINT
+  assertions:
+    match:
+      kind:
+        eq: AssertionGroup
+    check: annotation
+    coverage: ancestor
+    priority: 10
+    diagnostic: SPEC_HINT
+  technical-registrations:
+    match:
+      any:
+        - all:
+            - path:
+                glob: "*/skillstore/internal/access/abc/client.go"
+            - name:
+                in:
+                  - ValidLogin
+                  - type localizedName
+                  - method Error
+                  - method Enabled
+                  - MainRoleCode
+                  - method roleCode
+                  - method mainRoleCode
+                  - roleNameSuffixForCode
+                  - type roleRef
+        - all:
+            - path:
+                glob: "*/skillstore/internal/access/abc/source_ownership.go"
+            - name:
+                in:
+                  - singleWantedLogin
+        - all:
+            - path:
+                glob: "*/skillstore/internal/arcadia/syncrepo/publication_queue.go"
+            - name:
+                in:
+                  - type publicationScanner
+                  - publicationQueueList
+                  - method publicationQueueList
+        - all:
+            - path:
+                glob: "*/skillstore/internal/readonly/gate.go"
+            - name:
+                in:
+                  - type Gate
+                  - WithState
+                  - ActiveFromContext
+        - all:
+            - path:
+                glob: "*/skillstore-frontend/src/components/pipeline-card.tsx"
+            - name:
+                in:
+                  - time
+                  - prLink
+        - all:
+            - path:
+                glob: "*/skillstore-frontend/src/components/ci-admission-settings.tsx"
+            - name:
+                in:
+                  - formatTime
+        - all:
+            - path:
+                glob: "*/skillstore-frontend/vite.config.ts"
+            - name:
+                in:
+                  - configResolved
+        - all:
+            - path:
+                glob: "*/skillstore-frontend/src/components/api-error-alert.tsx"
+            - name:
+                eq: humanize
+    check: annotation
+    coverage: self
+    priority: 60
+    diagnostic: SPEC_HINT
+  test-helpers:
+    match:
+      all:
+        - any:
+            - path:
+                glob: "*_test.go"
+            - path:
+                glob: "*/tests/test_*.py"
+            - path:
+                glob: "*.test.*"
+            - path:
+                glob: "*.spec.*"
+        - node:
+            eq: function
+    check: annotation
+    coverage: self
+    priority: 40
+    diagnostic: SPEC_HINT
+  private-test-helpers:
+    match:
+      all:
+        - language:
+            eq: python
+        - path:
+            glob: "*/testsuite/tests/test_*.py"
+        - node:
+            eq: function
+        - name:
+            glob: _*
+    check: annotation
+    coverage: self
+    priority: 43
+    diagnostic: SPEC_HINT
+  nested-test-helpers:
+    match:
+      all:
+        - any:
+            - path:
+                glob: "*_test.go"
+            - path:
+                glob: "*/testsuite/tests/test_*.py"
+            - path:
+                glob: "*.test.ts"
+            - path:
+                glob: "*.test.tsx"
+        - node:
+            eq: function
+        - ancestor:
+            node:
+              in:
+                - scenario
+                - fixture
+    check: annotation
+    coverage: self
+    priority: 44
+    diagnostic: SPEC_HINT
+  test-fixture-types:
+    match:
+      all:
+        - any:
+            - path:
+                glob: "*_test.go"
+            - path:
+                glob: "*/tests/test_*.py"
+            - path:
+                glob: "*.test.*"
+            - path:
+                glob: "*.spec.*"
+        - node:
+            eq: type
+    check: annotation
+    coverage: self
+    priority: 45
+    diagnostic: SPEC_HINT
+  table-subtests:
+    match:
+      all:
+        - path:
+            glob: "*_test.go"
+        - name:
+            eq: subtest t.Run
+        - node:
+            eq: scenario
+        - ancestor:
+            kind:
+              eq: "*ast.RangeStmt"
+    check: annotation
+    coverage: self
+    priority: 50
+    diagnostic: SPEC_HINT
+  runner-catch:
+    match:
+      all:
+        - path:
+            glob: "*/local-dev/scripts/*.cjs"
+        - kind:
+            eq: ArrowFunction
+        - ancestor:
+            all:
+              - node:
+                  eq: call
+              - name:
+                  glob: "*.catch"
+    check: annotation
+    coverage: self
+    priority: 42
+    diagnostic: SPEC_HINT
+exclusions:
+  test-decisions:
+    match:
+      ancestor:
+        node:
+          in:
+            - scenario
+            - fixture
+    rules:
+      - decisions
+      - presentation
+    reason: Внутренние ветвления сценария покрываются разметкой самого теста.
+  callback-decisions:
+    match:
+      ancestor:
+        kind:
+          in:
+            - ArrowFunction
+            - FunctionExpression
+            - "*ast.FuncLit"
+    rules:
+      - decisions
+    reason: Обычные решения callback покрываются основной операцией; отдельные строгие access-правила
+      сохраняются.
+  technical-decisions:
+    match:
+      ancestor:
+        any:
+          - all:
+              - path:
+                  glob: "*/skillstore/internal/access/abc/client.go"
+              - name:
+                  in:
+                    - ValidLogin
+                    - type localizedName
+                    - method Error
+                    - method Enabled
+                    - MainRoleCode
+                    - method roleCode
+                    - method mainRoleCode
+                    - roleNameSuffixForCode
+                    - type roleRef
+          - all:
+              - path:
+                  glob: "*/skillstore/internal/access/abc/source_ownership.go"
+              - name:
+                  in:
+                    - singleWantedLogin
+          - all:
+              - path:
+                  glob: "*/skillstore/internal/arcadia/syncrepo/publication_queue.go"
+              - name:
+                  in:
+                    - type publicationScanner
+                    - publicationQueueList
+                    - method publicationQueueList
+          - all:
+              - path:
+                  glob: "*/skillstore/internal/readonly/gate.go"
+              - name:
+                  in:
+                    - type Gate
+                    - WithState
+                    - ActiveFromContext
+          - all:
+              - path:
+                  glob: "*/skillstore-frontend/src/components/pipeline-card.tsx"
+              - name:
+                  in:
+                    - time
+                    - prLink
+          - all:
+              - path:
+                  glob: "*/skillstore-frontend/src/components/ci-admission-settings.tsx"
+              - name:
+                  in:
+                    - formatTime
+          - all:
+              - path:
+                  glob: "*/skillstore-frontend/vite.config.ts"
+              - name:
+                  in:
+                    - configResolved
+          - all:
+              - path:
+                  glob: "*/skillstore-frontend/src/components/api-error-alert.tsx"
+              - name:
+                  eq: humanize
+    rules:
+      - decisions
+      - presentation
+    reason: Внутренние решения зарегистрированного технического helper остаются advisory вместе с самим
+      helper.
+  helper-decisions:
+    match:
+      ancestor:
+        all:
+          - any:
+              - path:
+                  glob: "*_test.go"
+              - path:
+                  glob: "*/tests/test_*.py"
+              - path:
+                  glob: "*.test.*"
+              - path:
+                  glob: "*.spec.*"
+          - node:
+              eq: function
+    rules:
+      - decisions
+      - presentation
+    reason: Ветвления тестового helper не являются самостоятельными тестовыми сценариями.
+profiles:
+  base:
+    extends: []
+    rules:
+      - structural
+      - decisions
+      - sql
+      - declarations
+      - large-block
+      - lexical-guard
+      - callbacks
+      - assertions
+    exclusions:
+      - test-decisions
+  frontend:
+    extends:
+      - base
+    rules:
+      - presentation
+    exclusions: []
+  configuration:
+    extends:
+      - base
+    rules:
+      - yaml-sections
+      - ci-jobs
+    exclusions: []
+  skillstore:
+    extends:
+      - frontend
+      - configuration
+      - technical
+    rules:
+      - access-matrix
+      - access-actions
+      - access-go-call
+      - access-ts-call
+      - access-helpers
+      - access-frontend
+    exclusions: []
+  technical:
+    extends: []
+    rules:
+      - technical-registrations
+      - test-helpers
+      - private-test-helpers
+      - nested-test-helpers
+      - test-fixture-types
+      - table-subtests
+      - runner-catch
+    exclusions:
+      - callback-decisions
+      - technical-decisions
+      - helper-decisions
+default_profiles:
+  - skillstore
+parameters:
+  large_block_lines: 100
+annotation_language:
+  language: ru
+  diagnostic: SPEC_LANGUAGE
+annotation_uniqueness:
+  diagnostic: SPEC_DUPLICATE
+local_enforcement:
+  base_ref: trunk

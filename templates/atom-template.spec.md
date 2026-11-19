@@ -1,10 +1,11 @@
 ---
-id: {DOMAIN}-{MODULE}-{NNN}
-type: use-case                    # system | domain | aggregate | use-case | scenario
-parent: {PARENT_ID}
-title: "{Title}"
-status: draft                     # draft → review → ready → implemented → deprecated
-change_class: additive            # breaking | additive | compatible
+id: DOMAIN-USECASE-001
+type: use-case
+parent: DOMAIN
+title: "Название бизнес-сценария"
+status: draft
+change_class: additive
+change_type: RuleChange
 actors: []
 emits: []
 consumes: []
@@ -12,87 +13,58 @@ owners:
   analyst: ""
   developer: ""
   tester: ""
-tags: []
-created: {DATE}
-updated: {DATE}
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
 ---
 
-## § Intent
+## Intent
 
-{Актор} {действие} чтобы {бизнес-цель}.
-После успеха: {что изменилось в системе}.
-После неудачи: {что происходит}.
+Опишите актора, цель, результат успеха и последствия отказа.
 
-## § Domain Rules
+## Domain Rules
 
-- **DR-1**: {Субъект} {условие} {ограничение}. {Что происходит при нарушении}.
+### DR-1. Название правила
 
-## § Acceptance Criteria
+Условие, обязательное поведение, границы и последствия нарушения.
+
+## Acceptance Criteria
+
+### AC-1. Успех
+
+Проверяет DR-1.
 
 ```gherkin
-Scenario: {Happy path} 
-  Given {предусловие}
-  When {действие актора}
-  Then {ожидаемый результат}
-
-Scenario: {Negative — DR-1 violation}
-  Given {предусловие}
-  When {действие, нарушающее DR-1}
-  Then {результат нарушения}
+Scenario: Бизнес-результат
+  Given конкретное исходное состояние
+  When актор выполняет действие
+  Then наблюдается определённый результат
 ```
 
-## § Domain Model Touch
+### AC-2. Отказ
 
-- **Aggregate**: {Name} ({create|update|delete})
-- **Events emitted**: {EventName} { field1, field2 }
-- **Events consumed**: —
-- **Invariants**: {описание}
-- **Read Models affected**: {список}
+Проверяет DR-1.
 
-## § Constraints
+```gherkin
+Scenario: Нарушено условие
+  Given состояние за допустимой границей
+  When актор выполняет действие
+  Then наступает определённый отказ
+    And сохраняется требуемый инвариант
+```
 
-- **[PERF]** {требование к производительности}
-- **[SEC]** {требование к безопасности}
-- **[IDMP]** {требование к идемпотентности}
-- **[A11Y]** {требование к доступности}
+## Business Model
 
-## § Open Questions
+Предметные понятия, отношения, бизнес-события и инварианты.
 
-- **OQ-1** [{blocking|non-blocking}]: {вопрос}
+## Constraints
 
-## § Decision Log
+Измеримые гарантии потребителю. Обязательные проверяемые гарантии объявляйте
+как DR/BR с устойчивым ID; здесь допускаются ссылки и контекст.
 
-- **DL-1** ({DATE}): {решение}. Причина: {обоснование}.
+## Open Questions
 
-## § Tech Spec
+Нет / OQ-N с blocking или non-blocking и явным допущением.
 
-<!-- Заполняется Разработчиком -->
+## Decision Log
 
-### API
-
-### Data Schema
-
-### Architecture
-
-## § Test Plan
-
-<!-- Заполняется Тестировщиком -->
-
-### Coverage Matrix
-
-| Источник | ID | Описание | Тест-кейс | Статус |
-|----------|-----|----------|-----------|--------|
-
-### Test Cases
-
-## § Implementation Notes
-
-<!-- Заполняется Разработчиком -->
-
-### Trade-offs
-
-### Dependencies
-
-### Known Limitations
-
-### File Map
+DL-N, дата, бизнес-решение и обоснование.

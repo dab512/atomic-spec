@@ -1,0 +1,8 @@
+.local/
+.venv/
+__pycache__/
+*.py[cod]
+node_modules/
+.ruff_cache/
+.pytest_cache/
+.DS_Store

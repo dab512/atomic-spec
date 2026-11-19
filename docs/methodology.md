@@ -1,148 +1,46 @@
-**English** | [Русский](ru/methodology.md)
+English | [Русский](ru/methodology.md)
 
-# Atomic Spec Methodology
+# Methodology 2.0
 
-## Philosophy
+Atomic Spec combines Domain-Driven, Use-Case-Driven, Requirements-Driven development
+with executable tests before implementation. One atom is one `*.spec.md` file with
+a stable ID, rules and observable acceptance criteria.
 
-Atomic Spec unifies four approaches into a single methodology for working with specifications:
+The specification must be sufficient to reproduce the business functionality
+without reading the old code. VCS history preserves why decisions were made;
+it is an audit trail, not a substitute for a complete current contract.
 
-- **DDD (Domain-Driven Design)** — the specification is built around the domain, not around technical decisions. Domain rules come first; implementation comes second.
-- **TDD (Test-Driven Development)** — acceptance criteria and the test plan are written before or in parallel with implementation, not after.
-- **Use-Case-Driven** — each atom describes a specific use case with actors, actions, and expected outcomes.
-- **Requirements-Driven** — requirements are captured explicitly and traced through the entire pipeline from Intent to test coverage.
+## Business and architecture
 
-## AI-Native Methodology
+Business domains describe actors, outcomes, rules, invariants and guarantees.
+The separate `architecture/` domain records selected technologies, component
+boundaries and contracts, alternatives and replacement conditions. It belongs
+to the same specification tree. A feature does not require its own technical duplicate.
+Implementation file maps, debugging history and run reports live near the code.
 
-Atomic Spec is designed to be executed by AI agents. The three roles — **Analyst**, **Developer**, **Tester** — are AI agent roles, coordinated by an **Orchestrator Agent**. The methodology works equally well with human teams, but its structure (strict contracts, gate checklists, machine-readable frontmatter) is optimized for AI-driven workflows.
+A technical product may have an API or protocol as its external business contract.
+Separate consumer guarantees from replaceable mechanisms by meaning.
 
-### File Tree as Project State
+## Workflow
 
-The `/specs/` directory tree is the **live representation of the current project state**. It replaces backlogs, dashboards, and task trackers:
+Context → analysis / Gate A → Gherkin / Gate B → executable tests / Gate C (RED)
+→ implementation / Gate D (GREEN) → acceptance.
 
-- **Directory = Domain** (bounded context)
-- **File in root = Active requirement** (ready for development)
-- **File in `_draft/` = Work in progress** (has open questions)
-- **File in `_deprecated/` = Historical record** (replaced by a newer atom)
+Roles are responsibilities that one agent or person can assume. Delegation is
+optional. Each role reads all necessary requirements and changes its own artifacts.
+Project instructions determine VCS, review, approvals, tooling and test scope.
 
-The AI agent **must read the file tree** before starting any work. Without this context, it cannot determine whether to create a new atom or modify an existing one. The tree is the agent's primary source of project awareness.
+## Status
 
-## Core Idea: One File = One Unit of Knowledge
+`draft → review → ready → implemented → deprecated` is the canonical atom lifecycle.
+`ready` means the contract has passed Gate B; it does not claim working code.
+`implemented` requires accepted behavior in a declared implementation scope/revision.
+It does not mean deployment or implementation on every stack. An amended contract
+returns to `review`. A regression invalidates the corresponding acceptance claim.
 
-An atom is the minimal indivisible unit of specification. A single Markdown file contains everything you need to know about a particular feature, rule, or constraint:
+Optional implementation/verification records hold scoped evidence, not an alternative
+atom lifecycle. Folder location does not set status. Read selected atoms through
+an explicit registry; a repository-wide scan is not a prerequisite.
 
-- **Business context** (Intent, Domain Rules)
-- **Acceptance criteria** (Acceptance Criteria)
-- **Technical decisions** (Tech Spec, Platform API)
-- **Test planning** (Test Plan, Coverage Matrix)
-- **Decision history** (Decision Log, Open Questions)
 
-There is no need to switch between Confluence, Jira, Google Docs, and Slack to understand what is going on. Everything is in one file, under version control.
-
-### Benefits of This Approach
-
-- **Traceability**: from a business requirement to a specific test — a single chain in a single file.
-- **Autonomy**: each atom is self-contained. It can be read, understood, and reviewed in isolation.
-- **Versionability**: Git stores the full change history of every atom.
-- **Reviewability**: a PR on an atom is a PR on the specification, code, and tests all at once.
-
-## Progressive Disclosure Principle
-
-An atom is not filled in all at once but incrementally, as it moves through the pipeline:
-
-```
-Analyst                   Developer                Tester
-─────────────────────     ─────────────────────    ─────────────────────
-Intent                    Tech Spec                Test Plan
-Domain Rules              Platform API             Platform Tests
-Acceptance Criteria       Implementation Notes     Coverage Matrix
-DMT, Constraints          Code                     AC Review
-Open Questions
-Decision Log
-```
-
-At each stage only the sections belonging to the current role are filled in. Previous sections are not modified without explicit agreement (amendment).
-
-This principle ensures:
-
-- **Focus**: each role works with its own slice of information.
-- **Contract**: the boundary between roles is clearly defined by gates.
-- **Quality**: each stage is validated before handoff to the next role.
-
-## Three Status Axes
-
-The state of an atom is described by three independent axes:
-
-### 1. Semantic Status (`status`)
-
-Reflects the maturity of the specification as a document:
-
-| Value        | Description                                                        |
-|-------------|--------------------------------------------------------------------|
-| `draft`     | The atom is in progress, has not yet passed all gates              |
-| `active`    | The atom is complete and serves as the current specification       |
-| `deprecated`| The atom has been replaced by another (see `supersedes` on the new atom) |
-
-### 2. Implementation Status (`implementation`)
-
-Reflects the state of the code:
-
-| Value         | Description                                    |
-|--------------|------------------------------------------------|
-| `none`       | Code has not been written yet                  |
-| `in-progress`| Implementation has started                     |
-| `done`       | Implementation is complete, passed Gate B      |
-
-### 3. Verification Status (`verification`)
-
-Reflects the state of testing:
-
-| Value         | Description                                    |
-|--------------|------------------------------------------------|
-| `none`       | Testing has not started                        |
-| `in-progress`| Test plan created, tests are being written     |
-| `passed`     | All tests pass, Coverage Matrix is filled in   |
-| `failed`     | Tests revealed issues, rework required         |
-
-### Axis Combinations
-
-The three axes are independent. A typical sequence of atom states:
-
-```
-draft / none / none           — Analyst is working
-draft / in-progress / none    — Developer is implementing
-draft / done / in-progress    — Tester is verifying
-active / done / passed        — Atom is complete
-```
-
-Atypical but valid combinations:
-
-```
-active / done / failed        — Regression: tests failed on an active atom
-deprecated / done / passed    — Atom replaced by a new one, but old code still works
-```
-
-## Methodology Test
-
-The Atomic Spec methodology passes a simple test:
-
-> **Can you reconstruct the full project history by reading only `git log`?**
-
-If the answer is yes, the methodology is being applied correctly. This is ensured by:
-
-- **Atom-first**: specification atom first, code second. Every commit is tied to a specific atom.
-- **One atom = one PR**: changes are atomic and isolated.
-- **Change type in the commit**: the commit message makes it clear what changed (parameter, rule, flow, model, boundary).
-- **Gates as milestones**: passing a gate is recorded in the history.
-- **Decision Log**: the rationale behind decisions is preserved in the atom itself.
-
-Thus the repository becomes the single source of truth — not only for code but also for all requirements, decisions, and their justifications.
-
-## Related Documents
-
-- [Quick Start](getting-started.md)
-- [Atom Anatomy](atom-anatomy.md)
-- [Roles and Pipeline](roles-and-pipeline.md)
-- [Gate Validation](ru/gate-validation.md)
-- [Change Types](ru/change-types.md)
-- [Git Conventions](ru/git-conventions.md)
-- [Amendments](ru/amendments.md)
+[Methodology](methodology.md) · [Gates](gate-validation.md) · [Migration to 2.0](migration-v2.md)

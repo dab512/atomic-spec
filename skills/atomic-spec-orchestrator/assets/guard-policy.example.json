@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "files": {"minimum_annotations": 1, "diagnostic": "SPEC_FILE", "exclusions": []},
+  "diagnostics": {
+    "SPEC002": {"severity": "error", "title": "Нет пояснения", "message": "{reason}", "hint": "Объясните правило после URI.", "params": {}, "group_by": ["code"]},
+    "SPEC004": {"severity": "error", "title": "Неверная ссылка", "message": "{reason}", "hint": "Проверьте реестр и пункт требования.", "params": {}, "group_by": ["code"]},
+    "SPEC008": {"severity": "error", "title": "Ошибка парсера", "message": "{reason}", "hint": "Проверьте синтаксис и зависимости.", "params": {}, "group_by": ["code"]},
+    "SPEC_NOTICE": {"severity": "notice", "title": "Исключение", "message": "{reason}", "hint": "Учитывайте непроверенную область.", "params": {}, "group_by": ["code"]},
+    "SPEC_FILE": {"severity": "error", "title": "Нет аннотации файла", "message": "{name}", "hint": "Добавьте существующее требование и пояснение.", "params": {}, "group_by": ["code"]},
+    "SPEC_COVER": {"severity": "error", "title": "Нет покрытия блока", "message": "{name}", "hint": "Свяжите блок с требованием.", "params": {}, "group_by": ["code"]}
+  },
+  "rules": {
+    "structural": {"match": {"node": {"in": ["function", "type", "scenario"]}}, "check": "annotation", "coverage": "self", "priority": 10, "diagnostic": "SPEC_COVER"}
+  },
+  "exclusions": {},
+  "profiles": {"portable": {"extends": [], "rules": ["structural"], "exclusions": []}},
+  "default_profiles": ["portable"],
+  "parameters": {}
+}
