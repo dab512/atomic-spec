@@ -1,4 +1,4 @@
-# Release 2.0.0 acceptance
+# Release 2.0.1 acceptance
 
 Local environment: Python 3.13.5, Playwright 1.55.0 with installed Chrome,
 PyYAML 6.0.3, Ruff 0.15.15, Node 24.4.1 and Go 1.24.5. Existing local development

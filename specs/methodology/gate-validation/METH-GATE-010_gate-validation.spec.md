@@ -6,7 +6,7 @@ title: "Проверки A/B/C/D и приёмка"
 status: ready
 change_class: breaking
 change_type: FlowChange
-created: 2026-03-23
+created: 2024-01-01
 updated: 2026-11-19
 ---
 

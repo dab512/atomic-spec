@@ -239,7 +239,7 @@ class ArchiveTests(unittest.TestCase):
         root = self.folder / "source"
         with tarfile.open(self.source) as archive:
             archive.extractall(root, filter="data")
-        root = root / "atomic-spec-2.0.0"
+        root = root / "atomic-spec-2.0.1"
         target = root / "skills/atomic-spec-orchestrator/vendor/specguard/specguard.py"
         original = target.read_bytes()
         target.write_bytes(original + b"\n# changed\n")

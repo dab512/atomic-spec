@@ -6,7 +6,7 @@ title: "Зафиксированный Git Guard"
 status: ready
 change_class: breaking
 change_type: FlowChange
-created: 2026-03-23
+created: 2026-11-19
 updated: 2026-11-19
 ---
 

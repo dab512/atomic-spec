@@ -17,7 +17,7 @@ delegation is optional.
 apm install dab512/atomic-spec --target agent-skills
 ```
 
-Pinned distribution: [GitHub Release v2.0.0](https://github.com/dab512/atomic-spec/releases/tag/v2.0.0), asset `atomic-spec-orchestrator-2.0.0.zip`. Extract into `.agents/skills/`.
+Pinned distribution: [GitHub Release v2.0.1](https://github.com/dab512/atomic-spec/releases/tag/v2.0.1), asset `atomic-spec-orchestrator-2.0.1.zip`. Extract into `.agents/skills/`.
 
 ## Getting started
 

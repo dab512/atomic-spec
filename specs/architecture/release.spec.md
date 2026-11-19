@@ -55,7 +55,7 @@ atomic-spec://METH-GATE-010/DR-2
 
 ## Contracts
 
-GitHub Release v2.0.0; atomic-spec-2.0.0.tar.gz; atomic-spec-orchestrator-2.0.0.zip;
+GitHub Release v2.0.1; atomic-spec-2.0.1.tar.gz; atomic-spec-orchestrator-2.0.1.zip;
 SHA256SUMS. GitHub Pages публикует docs/ из main; website/ содержит идентичный сайт.
 
 ## Alternatives and Replacement

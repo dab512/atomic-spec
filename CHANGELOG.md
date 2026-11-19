@@ -1,8 +1,11 @@
 # Changelog
 
-## 2.0.0 — 2026-11-19
+## 2.0.1 — 2026-11-19
 
-Breaking methodology update based on atomic-spec-orchestrator 2.0.0-local.2.
+The initial v2.0.0 tag remains an unpublished preparation snapshot. The stable
+release pins Ubuntu 24.04 because Playwright 1.55 cannot install on Ubuntu 26.04.
+
+Breaking methodology update based on atomic-spec-orchestrator 2.0.1-local.2.
 
 - Portable business contracts and a replaceable architecture domain.
 - Gates A (analysis), B (Gherkin), C (executable RED), D (GREEN), then acceptance.

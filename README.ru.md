@@ -17,7 +17,7 @@
 apm install dab512/atomic-spec --target agent-skills
 ```
 
-Закреплённая поставка: [GitHub Release v2.0.0](https://github.com/dab512/atomic-spec/releases/tag/v2.0.0), архив `atomic-spec-orchestrator-2.0.0.zip`. Распакуйте в `.agents/skills/`.
+Закреплённая поставка: [GitHub Release v2.0.1](https://github.com/dab512/atomic-spec/releases/tag/v2.0.1), архив `atomic-spec-orchestrator-2.0.1.zip`. Распакуйте в `.agents/skills/`.
 
 ## Начало работы
 

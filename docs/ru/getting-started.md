@@ -21,8 +21,8 @@
 apm install dab512/atomic-spec --target agent-skills
 ```
 
-Для закреплённой переносимой копии скачайте `atomic-spec-orchestrator-2.0.0.zip`
-из GitHub Release v2.0.0 и распакуйте в `.agents/skills/`. Верхний каталог архива —
+Для закреплённой переносимой копии скачайте `atomic-spec-orchestrator-2.0.1.zip`
+из GitHub Release v2.0.1 и распакуйте в `.agents/skills/`. Верхний каталог архива —
 `atomic-spec-orchestrator`. Совместимость упаковки APM сохранена; установка через
 живой сервис APM не входит в локальную приёмку архива.
 
